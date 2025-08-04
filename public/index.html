@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-2R8CB1NJM7"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-2R8CB1NJM7');
+    </script> -->
+
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script> -->
+    <!-- <script src="http://sjhtest.musicen.com:19000/socket.io/socket.io.js"></script> -->
+    <!-- <script src="http://localhost:19000/socket.io/socket.io.js"></script> -->
+    <script>
+      // socket.io.js 동적으로 로딩하기
+      const hostname = window.location.hostname;
+      const scriptUrl = `//${window.location.host}/socket.io/socket.io.js`;
+      const scriptEl = document.createElement("script");
+      scriptEl.src = scriptUrl;
+      document.head.appendChild(scriptEl);
+    </script>
+
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    ></script>
+
+    <title>Document</title>
+  </head>
+  <body class="bg-secondary">
+    <template>
+      <button
+        class="btn btn-primary"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseExample"
+        aria-expanded="false"
+        aria-controls="collapseExample"
+      >
+        Button with data-bs-target
+      </button>
+
+      <div class="collapse" id="collapseExample">
+        <div class="card card-body">
+          Some placeholder content for the collapse component. This panel is
+          hidden by default but revealed when the user activates the relevant
+          trigger.
+        </div>
+      </div>
+    </template>
+    <h1 class="px-5 mb-5">sjhtest</h1>
+    <div id="contents" class="d-flex flex-column justify-content-center">
+      <div class="px-5 w-100 mb-6">
+        <div
+          id="chat-div"
+          class="bg-warning"
+          style="height: 200px; overflow-y: scroll"
+        >
+          <template id="chat-div-li">
+            <!-- <li class="border border-dark lisn mb-3 list-unstyled"><pre>hello gogo</pre></li> -->
+            <li class="btn btn-info w-100 mb-3 border border-dark">
+              <pre>hello gogo</pre>
+            </li>
+          </template>
+        </div>
+
+        <div>
+          <textarea
+            onkeydown="chatMsgEnter(event)"
+            type="text"
+            id="chatMsg"
+            class="w-100"
+            style="display: inline; min-height: 50px"
+          ></textarea>
+          <button class="btn btn-primary" onclick="chatMsg()">
+            chat-click
+          </button>
+          <button class="btn btn-primary" onclick="chatClear()">
+            chat-clear
+          </button>
+        </div>
+
+        <hr class="border w-100 mb-5" />
+        <button class="btn btn-primary" onclick="delFileXAll()">del-all</button>
+        <!-- <input type="file" onchange="" > -->
+        <!-- in onchang method with fileObject exect selectFile(e.target.files[0]) -->
+        <input type="file" onchange="selectFile(this.files)" />
+
+        <input type="file" onchange="gogosing(this.files)" />
+
+        <script>
+          function gogosing(files) {
+            const file = files[0];
+            const formData = new FormData();
+            formData.append("myfile", file);
+
+            $.ajax({
+              url: "",
+              type: "POST",
+              data: formData,
+              processData: false, // FormData 전송 시 필수
+              contentType: false, // FormData 전송 시 필수
+              success: function (res) {
+                console.log("업로드 성공:", res);
+                alert("업로드 완료!");
+              },
+              error: function (err) {
+                console.error("업로드 실패:", err);
+              },
+            });
+          }
+        </script>
+        <div
+          id="fild-div"
+          class=""
+          style="height: 200px; border: 1px solid black"
+        >
+          <p>weoifj</p>
+        </div>
+        <div>
+          <template id="chat-file-li">
+            <li>
+              <a style="color: black" download="" href="">wefwef</a>
+              <span>X</span>
+            </li>
+          </template>
+          <ul id="chat-file-div">
+            <!-- <li>
+              <span>wefwef</span>
+              <span>X</span>
+            </li> -->
+          </ul>
+        </div>
+      </div>
+
+      <div class="row col-12">
+        <div class="col-lg-6">
+          <button class="btn btn-sm btn-primary w-100" onclick="fromUrlToObj()">
+            실행!@#
+          </button>
+          <input
+            class="form-control"
+            id="fromUrl"
+            value="https://kauth.kakao.com/oauth/authorize?client_id=5a7b929464b09e5e157348ce99c7f737&redirect_uri=undefined&response_type=code&ka=sdk%2F1.43.1%20os%2Fjavascript%20sdk_type%2Fjavascript%20lang%2Fko%20device%2FWin32%20origin%2Fhttp%253A%252F%252Flocalhost%253A5503&origin=http%3A%2F%2Flocalhost%3A5503&prompt=login"
+          />
+
+          <textarea
+            id="toObj"
+            style="white-space: pre-wrap; word-wrap: break-word"
+            class="form-control"
+            rows="8"
+          ></textarea>
+          <!-- style="width: 250px; height: 150px; white-space: pre-wrap; word-wrap: break-word; background-color: white" -->
+        </div>
+
+        <div class="col-lg-6">
+          <button class="btn btn-sm btn-primary w-100" onclick="fromObjToUrl()">
+            실행!@#
+          </button>
+          <input
+            class="form-control"
+            id="fromObj"
+            value='{client_id: "5a7b929464b09e5e157348ce99c7f737",redirect_uri: "undefined",response_type: "code",ka: "sdk/1.43.1 os/javascript sdk_type/javascript lang/ko device/Win32 origin/http://localhost:5503",origin: "http://localhost:5503",prompt: "login",}'
+          />
+
+          <textarea
+            id="toUrl"
+            style="white-space: pre-wrap; word-wrap: break-word"
+            class="form-control"
+            rows="8"
+          ></textarea>
+          <!-- style="width: 250px; height: 150px; white-space: pre-wrap; word-wrap: break-word; background-color: white" -->
+        </div>
+      </div>
+
+      <hr class="border w-100 mb-5" />
+
+      <div class="">
+        <button
+          class="btn btn-primary w-100"
+          data-bs-toggle="collapse"
+          data-bs-target="#pingTest"
+        >
+          핑 테스트
+        </button>
+        <div class="collapse show" id="pingTest">
+          <div class="card card-body d-grid gap-3">
+            <a
+              href="/ping/delay/1"
+              target="_blank"
+              class="btn btn-info text-start"
+              >n초 딜레이 GET</a
+            >
+            <a
+              href="/ping/delayErr/1"
+              target="_blank"
+              class="btn btn-info text-start"
+              >n초 딜레이후 내부 throw</a
+            >
+            <a
+              href="/ping/delay500/1"
+              target="_blank"
+              class="btn btn-info text-start"
+              >n초 딜레이후 status500 세팅</a
+            >
+            <a
+              href="/ping/delayImg1/1"
+              target="_blank"
+              class="btn btn-info text-start"
+              >n초후 말 이미지 리턴</a
+            >
+            <a
+              href="/ping/delayImg2/1"
+              target="_blank"
+              class="btn btn-info text-start"
+              >n초후 사람 이미지 리턴</a
+            >
+
+            <!-- <a href="/ping/same/1" target="_blank" class="btn btn-info text-start">n초후 같은 json 그대로리턴</a> -->
+            <a
+              href="javascript:void(0)"
+              onclick='fetch("/ping/same/1", { method: "POST", headers: { "content-type": "application/json", },body: JSON.stringify({ a: 1, b: 2, }), }).then(r=>r.json()).then(d => alert(JSON.stringify(d)))'
+              class="btn btn-info text-start"
+              >n초후 같은 json 그대로리턴</a
+            >
+            <pre>
+              const url = "http://sjhtest.musicen.com/ping/same/1" 
+              const options = {
+                method: "POST", 
+                headers: { "content-type": "application/json"},
+                body: JSON.stringify({ a: 1, b: 2, })
+              }
+              fetch(url, options).then(r=>r.json()).then(d => alert(JSON.stringify(d)))
+              ------------OR------------
+              fetch("http://sjhtest.musicen.com/ping/same/1", { method: "POST", headers: { "content-type": "application/json", },
+              body: JSON.stringify({ a: 1, b: 2, }), }).then(r=>r.json()).then(d => alert(JSON.stringify(d)))
+            </pre>
+
+            <a
+              href="javascript:void(0)"
+              onclick='fetch("/ping/sameErr/1", { method: "POST", headers: { "content-type": "application/json",}, body: JSON.stringify({ a: 1, b: "sjh-err", }), }).then(r=>r.json()).then(d => alert(JSON.stringify(d)))'
+              class="btn btn-info text-start"
+              >n초후 같은 json 그대로리턴</a
+            >
+            <pre>
+              fetch("http://sjhtest.musicen.com/ping/sameErr/1", { method: "POST", headers: { "content-type": "application/json",
+            }, body: JSON.stringify({ a: 1, b: 2, }), }).then(r=>r.json()).then(d => alert(JSON.stringify(d)))
+            </pre>
+          </div>
+        </div>
+
+        <div class="d-grid gap-1">
+          <a
+            href="/jwtToken.html"
+            target="_blank"
+            class="btn btn-info text-start"
+            >jwttoken 생성, 더미화면</a
+          >
+          <a href="/aes256.html" target="_blank" class="btn btn-info text-start"
+            >aes256 변환사이트</a
+          >
+          <a
+            href="/ktlogin.html"
+            target="_blank"
+            class="btn btn-info text-start"
+            >kt로그인 화면</a
+          >
+          <a href="/myheader" target="_blank" class="btn btn-info text-start"
+            >myHeader 내헤더보는화면</a
+          >
+          <a
+            href="#none"
+            onclick="window.open(`https://${location.hostname}:19001`)"
+            target="_blank"
+            class="btn btn-info text-start"
+            >WebRTC 테스트화면 https://sjhtest.soland.co.kr:19001/ ,
+            https://localhost:19001/</a
+          >
+          <a
+            href="#none"
+            onclick="window.open('https://sjhrtc.petnyang.shop/')"
+            target="_blank"
+            class="btn btn-info text-start"
+            >WebRTC 테스트화면 https://sjhrtc.petnyang.shop/</a
+          >
+          <a
+            href="/playM3u8.html"
+            target="_blank"
+            class="btn btn-info text-start"
+            >웹에서 m3u8 재생</a
+          >
+          <a
+            href="/hlsChSwitch.html"
+            target="_blank"
+            class="btn btn-info text-start"
+            >웹에서 m3u8 재생 + 화질 스위칭</a
+          >
+          <a
+            href="/stream-rtsp.html"
+            target="_blank"
+            class="btn btn-info text-start"
+            >rtsp를 웹에서 스트리밍 하는화면</a
+          >
+
+          <a
+            href="/formdata.html"
+            target="_blank"
+            class="btn btn-info text-start"
+            >formData 처리되는방법</a
+          >
+
+          <a
+            href="/kcpcert.html"
+            target="_blank"
+            class="btn btn-info text-start"
+            >kcpCert 본인인증 테스트</a
+          >
+
+          <div class="card card-body">
+            <h1>cors 스킵해서 쏘기</h1>
+            <button
+              class="btn btn-primary"
+              onclick="fetch('https://www.naver.com')"
+            >
+              네이버 그냥 fetch 때리기(cors에러발생)
+            </button>
+            <button
+              class="btn btn-primary"
+              onclick='fetch("/skipCors", {method: "POST", headers: {"Content-Type": "application/json",},body: JSON.stringify({endPoint: "https://www.naver.com",method: "GET",headerData: {},bodyData: "",}), }).then(r=>r.text()).then(d => alert(d.slice(0,100)))'
+            >
+              네이버 skipCors로 프록시 우회
+            </button>
+            <pre>
+              에러남 -> fetch("https://www.naver.com")
+
+              ----에러 안남----
+              const jsonBody = {
+                  endPoint: "https://www.naver.com",
+                  method: "GET",
+                  headerData: {
+                  },
+                  bodyData: "",
+              };
+              
+              fetch("/skipCors", {
+                  method: "POST", // *GET, POST, PUT, DELETE, etc.
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(jsonBody), // body data type must match "Content-Type" header
+                }).then(r=>r.text()).then(d => alert(d.slice(0,100)))
+
+                -------한줄로 정리----------
+                fetch("/skipCors", {method: "POST", headers: {"Content-Type": "application/json",},body: JSON.stringify({endPoint: "https://www.naver.com",method: "GET",headerData: {},bodyData: "",}), }).then(r=>r.text()).then(d => alert(d.slice(0,100)))
+            </pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-body mb-5">
+        <pre>
+          pm2 리스타트 하는 방법
+          pm2 restart testserver // 라이브러리(ex dayjs)같은거없어서 리로드안될수있음
+          pm2 restart all
+        </pre>
+      </div>
+
+      <div class="card card-body mb-5">
+        <h1>paging 테스트 API</h1>
+
+        <button class="btn btn-primary" onclick="paging()">
+          페이징 api ㄱㄱ
+        </button>
+
+        <div class="row" style="height: 500px">
+          <textarea
+            class="col-4 h-100"
+            name=""
+            id="paging-textarea"
+            cols="30"
+            onkeyup="(window.event.ctrlKey) && (window.event.keyCode == 13) && paging()"
+          >
+            {
+                "pageNo" : 1,
+                "dataPerPage" : 12,
+                "count": 199,
+                "content": {
+                    "title" :"t1",
+                    "name" :"sjh"
+                }
+            }
+          </textarea>
+
+          <pre id="paging-pre" class="col-8 h-100 overflow-scroll"></pre>
+        </div>
+        <script>
+          paging();
+
+          async function paging() {
+            const pagingReq = JSON.parse($("#paging-textarea").val());
+
+            const pagingRes = await fetch("/paging", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify(pagingReq),
+            }).then((r) => r.json());
+            $("#paging-pre").text(JSON.stringify(pagingRes, null, 2));
+          }
+        </script>
+      </div>
+
+      <script>
+        // url 변환하기
+        function fromUrlToObj() {
+          let fromUrl = $("#fromUrl").val();
+          fromUrl = decodeURIComponent(fromUrl);
+
+          const param =
+            fromUrl.split("?").slice(1).join("") ||
+            fromUrl.split("#").slice(1).join("");
+          console.log("🚀 ~ fromUrlToObj ~ param:", param);
+
+          const paramObj = [...new URLSearchParams(param).entries()].reduce(
+            (prev, curr) => {
+              prev[curr[0]] = curr[1];
+              return prev;
+            },
+            {}
+          );
+          console.log("🚀 ~ paramObj ~ paramObj:", paramObj);
+
+          $("#toObj").val(JSON.stringify(paramObj, null, 2));
+        }
+        function fromObjToUrl() {
+          let fromObj = $("#fromObj").val();
+          fromObj = eval("(" + fromObj + ")");
+          // fromObj = JSON.parse(fromObj);
+
+          const str = `?${new URLSearchParams(fromObj).toString()}`;
+          console.log("🚀 ~ fromObjToUrl ~ str:", str);
+          $("#toUrl").val(str);
+        }
+      </script>
+
+      <script>
+        // socketio 채팅
+        let socketio;
+
+        function chatMsg() {
+          const chatMsg = $("#chatMsg").val();
+          socketio.emit("chat", chatMsg);
+        }
+        function chatMsgEnter(event) {
+          if (event.keyCode === 13) {
+            // Call the function you want to execute
+            chatMsg();
+          }
+        }
+        function chatClear() {
+          $("#chat-div").html(null);
+
+          socketio.emit("chatClear", "");
+        }
+
+        $(async function () {
+          await socketIOReadyPromise();
+          // socketio = io(`http://${location.hostname}:19000`);
+          socketio = io(``);
+
+          $(document).on("click", "#chat-div li", function (e) {
+            const li = e.currentTarget;
+            const content = $(li).find("pre")[0].innerText;
+            console.log("🚀 ~ $ ~ content:", content);
+
+            var textarea = document.createElement("textarea");
+            textarea.value = content;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+          });
+          socketio.on("chat", async (chatMsg) => {
+            console.log(chatMsg);
+            const li = $($("#chat-div-li").clone().html());
+            li.find("pre").text(chatMsg);
+
+            $("#chat-div").append(li);
+            $("#chat-div").scrollTop($("#chat-div").prop("scrollHeight"));
+          });
+
+          socketio.on("all-chat", async (chatMsgs) => {
+            const chatLis = chatMsgs.map((chat) => {
+              const li = $($("#chat-div-li").clone().html());
+              li.find("pre").text(chat);
+
+              return li;
+            });
+            console.log("🚀 ~ $.each ~ chatLis:", chatLis);
+
+            $.each(chatLis, function (idx, chat) {
+              $("#chat-div").append(chat);
+            });
+
+            $("#chat-div").scrollTop($("#chat-div").prop("scrollHeight"));
+          });
+
+          async function socketIOReadyPromise() {
+            //document.head.appendChild 로 script추가하는데
+            //1.script추가 -> 2.돔이 변경감지 -> 3.동적으로 추가된스크립트 실행
+            //이라서 결국은 비동기로 로딩이 되어서 따로 기다리는 promsie를 만듬
+            while (!window.io) {
+              // debugger
+              // await Promise.resolve();
+              await new Promise((resolve) => setTimeout(resolve, 0));
+            }
+          }
+        });
+      </script>
+
+      <script>
+        // drag and drop
+        $(function () {
+          // 파일 드롭 다운
+          fileDropDown();
+          getFiles();
+          fileXButtonHandler();
+        });
+        function delFileXAll() {
+          $.ajax({
+            url: `/fileChatDel`,
+            success: function (result) {
+              location.reload();
+            },
+            error: function (err) {
+              console.error(err);
+            },
+          });
+        }
+        function fileXButtonHandler() {
+          $(document).on("click", "#chat-file-div span", function (e) {
+            const span = e.currentTarget;
+            const li = $(span).closest("li")[0];
+            const aLink = $(li).find("a")[0];
+            const fileName = $(aLink).text();
+
+            $.ajax({
+              url: `/fileChatDel/${fileName}`,
+              success: function (result) {
+                location.reload();
+              },
+              error: function (err) {
+                console.error(err);
+              },
+            });
+          });
+        }
+        function getFiles() {
+          $.ajax({
+            url: "/fileChatList",
+            success: function (fileNms) {
+              const ul = $("#chat-file-div");
+              const li = $($("#chat-file-li").clone().html());
+              fileNms.forEach((fileNm) => {
+                const li = $($("#chat-file-li").clone().html());
+                li.find("a").text(fileNm);
+                li.find("a").attr("href", `/fileChatDown/${fileNm}`);
+
+                // check if fileNm endwith .jpg or .png
+                if (fileNm.endsWith(".jpg") || fileNm.endsWith(".png")) {
+                  li.append(
+                    " <img src='/fileChatDown/" + fileNm + "' width='100' />"
+                  );
+                }
+                ul.append(li);
+              });
+            },
+            error: function (error) {
+              console.error(error);
+            },
+          });
+        }
+        function fileDropDown() {
+          var dropZone = $("#fild-div");
+          //Drag기능
+          dropZone.on("dragenter", function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            // 드롭다운 영역 css
+            dropZone.css("background-color", "#E3F2FC");
+          });
+          dropZone.on("dragleave", function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            // 드롭다운 영역 css
+            dropZone.css("background-color", "#FFFFFF");
+          });
+          dropZone.on("dragover", function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            // 드롭다운 영역 css
+            dropZone.css("background-color", "#E3F2FC");
+          });
+          dropZone.on("drop", function (e) {
+            e.preventDefault();
+            // 드롭다운 영역 css
+            dropZone.css("background-color", "#FFFFFF");
+
+            var files = e.originalEvent.dataTransfer.files;
+            if (files != null) {
+              if (files.length < 1) {
+                /* alert("폴더 업로드 불가"); */
+                console.log("폴더 업로드 불가");
+                return;
+              } else {
+                selectFile(files);
+              }
+            } else {
+              alert("ERROR");
+            }
+          });
+        }
+
+        function selectFile(fileObject) {
+          // uploadFile(fileObject[0]);
+
+          // return;
+          var files = null;
+
+          if (fileObject != null) {
+            // 파일 Drag 이용하여 등록시
+            files = fileObject;
+          } else {
+            // 직접 파일 등록시
+            files = $("#multipaartFileList_" + fileIndex)[0].files;
+          }
+
+          if (files != null && files.length > 0) {
+            $("#fileDragDesc").hide();
+            $("fileListTable").show();
+          } else {
+            $("#fileDragDesc").show();
+            $("fileListTable").hide();
+          }
+
+          // 다중파일 등록
+          if (files == null) {
+            alert("NO");
+            return;
+          }
+
+          const promiseList = [...files].map((file) => uploadFile(file));
+          Promise.all(promiseList).then((res) => {
+            location.reload();
+          });
+        }
+
+        function uploadFile(file) {
+          var formData = new FormData();
+          formData.append("fileChat", file);
+          formData.append("paramMap", JSON.stringify({ a: 1, b: 2 }));
+          // var formData = new FormData($("form")[0]);
+          // debugger
+
+          // console.log("all form data", [...formData.keys()]);
+          console.log("🚀 ~ ajaxFile ~ formData", formData);
+
+          return $.ajax({
+            url: "/fileChat",
+            type: "POST",
+            contentType: false, //- contentType : false 로 선언 시 content-type 헤더가 multipart/form-data로 전송되게 함
+            processData: false, //- processData : false로 선언 시 formData를 string으로 변환하지 않음
+            data: formData,
+            // success: function (result) {
+            //   console.log("🚀 ~ ajaxFile ~ result", result);
+            // },
+            error: function (req, status, err) {
+              //- alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+              $("#errormsg").html(
+                "code:" +
+                  status +
+                  "\n" +
+                  "message:" +
+                  req.responseText +
+                  "\n" +
+                  "error:" +
+                  err
+              );
+            },
+          });
+        }
+      </script>
+    </div>
+  </body>
+</html>

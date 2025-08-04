@@ -1,0 +1,443 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous"></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <h3>form태그 이용한 파일 업로드</h3>
+
+    <form action="/formFile" method="post" enctype="multipart/form-data">
+      <!-- multer로 파싱하고 req.file 혹은 req.files로 받는다 -->
+      <input type="text" name="i1" value="gggg" />
+      <input type="file" id="file" name="avatar" />
+      <!-- ajax로 formdata 보내면 아래처럼 보인다
+        ------WebKitFormBoundarymPgk48MzxTAtASFk
+        Content-Disposition: form-data; name="i1"
+
+        gggg
+        ------WebKitFormBoundarymPgk48MzxTAtASFk
+        Content-Disposition: form-data; name="avatar"; filename=""
+        Content-Type: application/octet-stream
+
+
+        ------WebKitFormBoundarymPgk48MzxTAtASFk--
+
+
+        #############또는#########
+        POST /file/upload HTTP/1.1[\r][\n]
+        Content-Length: 344[\r][\n]
+        Content-Type: multipart/form-data; boundary=Uee--r1_eDOWu7FpA0LJdLwCMLJQapQGu[\r][\n]
+        Host: localhost:8080[\r][\n]
+        Connection: Keep-Alive[\r][\n]
+        User-Agent: Apache-HttpClient/4.3.4 (java 1.5)[\r][\n]
+        Accept-Encoding: gzip,deflate[\r][\n]
+        [\r][\n]
+        --Uee--r1_eDOWu7FpA0LJdLwCMLJQapQGu[\r][\n]
+        Content-Disposition: form-data; name=files; filename=test.txt[\r][\n]
+        Content-Type: application/octet-stream[\r][\n]
+        [\r][\n]
+        aaaa
+        [\r][\n]
+        --Uee--r1_eDOWu7FpA0LJdLwCMLJQapQGu[\r][\n]
+        Content-Disposition: form-data; name=files; filename=test1.txt[\r][\n]
+        Content-Type: application/octet-stream[\r][\n]
+        [\r][\n]
+        1111
+        [\r][\n]
+        --Uee--r1_eDOWu7FpA0LJdLwCMLJQapQGu--[\r][\n]
+        [출처] ------WebKitFormBoundary 관련..|작성자 보노보노 https://blog.naver.com/PostView.nhn?isHttpsRedirect=true&blogId=seyoung619&logNo=220764203336
+       -->
+      <button type="submit">submit</button>
+    </form>
+
+    <h3>post json data</h3>
+    <button onclick="postJson()">btn postJson</button>
+    <button onclick="postXXX()">btn postXXX</button>
+    <button onclick="ajaxFile()">btn ajaxFile</button>
+    <button onclick="xhrJson()">btn xhrJson</button>
+    
+    
+    
+    <h1>폼 데이터 어떻게 날아가느냐..?</h1>
+
+    <pre>
+    기본적으로 name="nm1" 을 기준으로 날아가고, 
+    name="nm", name="nm[]" 이 같이있으면 데이터가 날아갈때는 nm=va1&nm[]=val2 이런식으로 날아가지만 노드서버에서 파싱하면 그냥 nm=[val1, val2] 가 된다
+    post로쏘던 get으로 쏘던 문자열 데이터의 형식이 enocodedUrl 형식이란건 똑같아서 파싱도똑같다
+
+    배열로 날릴때는 name="myKey[]" 여러개를 날리는게 공식이지만
+    name="myKey"를 여러개날려도 서버파서가 배열로받는다(근데 어쩌다 input 하나만 날리면 또 String으로 받음)
+    </pre>
+
+    <script>
+      const checkBoxHtml = `
+    <form action="/howData" method="post">
+      <div>
+        <input type="checkbox" id="horns" name="horns[1]" value="ho1" checked>
+        <label for="horns">Horns</label>
+      </div>
+      <button type="submit">submit</button>
+    </form>
+    `;
+      $(function () {
+        $("#checkBoxHtml").text(checkBoxHtml);
+      });
+    </script>
+
+    <div style="border: 1px solid black">
+      <pre id="checkBoxHtml"></pre>
+      <pre>
+        체크박스@@ 값 하나만 날리기 대괄호 []는 horns 라는 키값에 영향을 주지않는다
+        (키값 무조건 horns이고 horns{}같은건 얄짤없이 키값이 'horns{}'로 박힌다)
+
+        하지만 대괄호를 쓰지않으면 인자가 하나일경우(후술하겠지만 인자여러개면 그냥 배열로받음) url파서가
+        horns ==> "horns": "ho1"  
+        대괄호를쓰면 서버가
+        horns[] ==> "horns": ["ho1"] 이렇게 받는다
+
+        
+        보내는값: 'horns[1]=ho1'==> horns%5B1%5D=ho1
+        받는값
+        "horns": [
+          "ho1"
+        ]
+
+
+        보내는값: 'horns=ho1'==> horns=ho1
+        받는값
+        "horns": [
+          "ho1"
+        ]
+        
+        </pre
+      >
+      <form action="/howData" method="post">
+        <div>
+          <input type="checkbox" id="horns" name="horns[1]" value="ho1" checked />
+          <!-- <input type="checkbox" id="horns2" name="horns[f]" value="ho2"> -->
+          <label for="horns">Horns</label>
+        </div>
+        <button type="submit">submit</button>
+      </form>
+    </div>
+    <script>
+      const checkBoxHtml2 = `
+      <form action="/howData" method="post">
+        <div>
+          <input type="checkbox" id="horns" name="horns[1]" value="ho1" checked />
+          <input type="checkbox" id="horns" name="horns[2]" value="ho2" checked />
+          <input type="checkbox" id="horns" name="horns[99]" value="ho3" checked />
+          <label for="horns">Horns</label>
+        </div>
+        <button type="submit">submit</button>
+      </form>
+    `;
+      $(function () {
+        $("#checkBoxHtml2").text(checkBoxHtml2);
+      });
+    </script>
+
+    <div style="border: 1px solid black">
+      <pre id="checkBoxHtml2"></pre>
+      <pre>
+        체크박스@@ 값 하나만 날리기 대괄호를 넣든 안넣든 키값은 horns로 통일된다
+        보내는값: 'horns%5B%5D=ho1&horns%5B%5D=ho2&horns%5B%5D=ho3'==> 'horns[]=ho1&horns[]=ho2&horns[]=ho3'
+        다대괄호를 안쓰든 horns=ho1&horns=ho2&horns=ho3
+        한넘만다대괄호를 쓰든 horns[]=ho1&horns=ho2&horns=ho3
+        죄다대괄호를 쓰든 horns[]=ho1&horns[]=ho2&horns[]=ho3
+        서버에서는 똑같이 받는다 다만
+
+        "병신" 같은게 있는데
+        horns[99]=ho1&horns[9]=ho2&horns[8]=ho3  이런건 서버에서 파싱하면 배열이되는데
+          "horns": [
+            "ho1",
+            "ho2",
+            "ho3"
+          ]
+
+          @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+          @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        horns[101]=ho1&horns[9]=ho2&horns[8]=ho3  100이 넘어가는순간
+
+        "horns": {
+          "1": "ho1",
+          "2": "ho2",
+          "101": "ho3"
+        }
+        이따구로 파싱됨 json씁시다
+      </pre>
+      <h5>horns[]=ho1&horns=ho2&horns=ho3 이런식으로 한놈만 [] 대괄호를 쓰거나 해도 상관없이 배열로받는다</h5>
+
+      <form action="/howData" method="post">
+        <div>
+          <input type="checkbox" id="horns" name="horns[1]" value="ho1" checked />
+          <input type="checkbox" id="horns" name="horns[2]" value="ho2" checked />
+          <input type="checkbox" id="horns" name="horns[100]" value="ho3" checked />
+          <label for="horns">Horns</label>
+        </div>
+        <button type="submit">submit</button>
+      </form>
+
+      <h4>name="horns[101]" 이라서 서버에서 obj되는놈 ㅋㅋ</h4>
+      <form action="/howData" method="post">
+        <div>
+          <input type="checkbox" id="horns" name="horns[1]" value="ho1" checked />
+          <input type="checkbox" id="horns" name="horns[2]" value="ho2" checked />
+          <input type="checkbox" id="horns" name="horns[101]" value="ho3" checked />
+          <label for="horns">Horns</label>
+        </div>
+        <button type="submit">submit</button>
+      </form>
+    </div>
+
+    <script>
+      const allHtml = `
+      <form action="/howData" method="post">
+        <input type="text" name="a()" value="azz@@" />
+        <input type="text" name="a" value="azz" />
+        <input type="text" name="a[0]" value="a1" />
+        <input type="text" name="a[]" value="a2" />
+        <input type="text" name="a[g]" value="a2" />
+        <input type="text" name="b" value="bb" />
+        <div>
+          <input type="checkbox" id="scales" name="scales" checked />
+          <label for="scales">Scales</label>
+        </div>
+
+        <div>
+          <input type="checkbox" id="horns" name="horns[1]" value="ho1" checked />
+          <input type="checkbox" id="horns2" name="horns[f]" value="ho2" checked/>
+          <label for="horns">Horns</label>
+        </div>
+        <div>
+          <input type="radio" id="huey" name="drone" value="huey" checked />
+          <label for="huey">Huey</label>
+        </div>
+
+        <div>
+          <input type="radio" id="dewey" name="drone" value="dewey" />
+          <label for="dewey">Dewey</label>
+        </div>
+
+        <div>
+          <input type="radio" id="louie" name="drone" value="louie" />
+          <label for="louie">Louie</label>
+        </div>
+        <button type="submit">sumit@@@@</button>
+      </form>
+    `;
+      $(function () {
+        $("#preAll").text(allHtml);
+      });
+    </script>
+
+    <div style="border: 1px solid black">
+      <pre id="preAll"></pre>
+      <pre>
+
+        아래내용을 encodeUrl 해서 쏘고
+        'a()=azz@@&a=azz&a[0]=a1&a[]=a2&a[g]=a2&b=bb&scales=on&horns[1]=ho1&horns[f]=ho2&drone=huey' 
+
+        a%28%29=azz%40%40&a=azz&a%5B0%5D=a1&a%5B%5D=a2&a%5Bg%5D=a2&b=bb&scales=on&horns%5B1%5D=ho1&horns%5Bf%5D=ho2&drone=huey
+
+
+
+        서버에서는
+          "body": {
+            "a()": "azz@@",
+            "a": {
+              "0": "azz",
+              "1": "a1",
+              "2": "a2",
+              "g": "a2"
+            },
+            "b": "bb",
+            "scales": "on",
+            "horns": {
+              "1": "ho1",
+              "f": "ho2"
+            },
+            "drone": "huey"
+          }
+
+
+
+          a[?] 에 숫자(0~100) 만 넣으면 그냥 List로 인식하는데 100초과한수, 알파벳등을 넣으면 바로 Map으로 인식함
+        
+      </pre>
+
+      <form action="/howData" method="post">
+        <input type="text" name="a()" value="azz@@" />
+        <input type="text" name="a" value="azz" />
+        <input type="text" name="a[0]" value="a1" />
+        <input type="text" name="a[]" value="a2" />
+        <input type="text" name="a[g]" value="a2" />
+        <input type="text" name="b" value="bb" />
+        <div>
+          <input type="checkbox" id="scales" name="scales" checked />
+          <label for="scales">Scales</label>
+        </div>
+
+        <div>
+          <input type="checkbox" id="horns" name="horns[1]" value="ho1" checked />
+          <input type="checkbox" id="horns2" name="horns[f]" value="ho2" checked />
+          <label for="horns">Horns</label>
+        </div>
+        <div>
+          <input type="radio" id="huey" name="drone" value="huey" checked />
+          <label for="huey">Huey</label>
+        </div>
+
+        <div>
+          <input type="radio" id="dewey" name="drone" value="dewey" />
+          <label for="dewey">Dewey</label>
+        </div>
+
+        <div>
+          <input type="radio" id="louie" name="drone" value="louie" />
+          <label for="louie">Louie</label>
+        </div>
+        <button type="submit">sumit@@@@</button>
+      </form>
+    </div>
+
+    <script>
+      function postt() {
+        fetch("/howData", {
+          method: "POST",
+          contentType: "application/x-www-form-urlencoded",
+          body: new URLSearchParams({ a: [1, 2, 3], b: 44, c: "zzgg" }),
+        });
+      }
+    </script>
+
+    <div style="border: 1px solid black">
+      <button onclick="postt()">new URLSearchParams({ a: [1, 2, 3], b: 44, c: "zzgg" }) 날려보기</button>
+      <pre>
+      일단 URLSearchParams에 대해서좀 알아봅시다..(url로 보낼때는 decodeUrl해야됨)
+      (new URLSearchParams({a:1, b:2})).toString() // 'a=1&b=2'
+      (new URLSearchParams({a:[1,2,3], b:2})).toString() 'a=1,2,3&b=2'
+      URLSearchParams이 배열을 저따구로 트랜스파일 하는데 서버에서 당연히 못받음 {a: "1,2,3", b: "44", c: "zzgg"} 서버는 배열로인식안함
+
+      스택오버에서는 
+      var data = new URLSearchParams();
+      data.append('userName', 'test@gmail.com');
+      data.append('password', 'Password');
+      data.append('grant_type', 'password');
+
+      이렇게넣으라는데 그럴거면 이거 왜쓰냐고..????.....
+      </pre>
+    </div>
+  </body>
+</html>
+
+
+<script>
+  function xhrJson() {
+    // var xhr = new XMLHttpRequest();
+    // var data = {
+    //   name: "zerocho",
+    //   birth: 1994,
+    // };
+    // xhr.onload = function () {
+    //   if (xhr.status === 200 || xhr.status === 201) {
+    //     console.log(xhr.responseText);
+    //   } else {
+    //     console.error(xhr.responseText);
+    //   }
+    // };
+    // xhr.open("POST", "/json");
+    // xhr.setRequestHeader("Content-Type", "application/json"); // 컨텐츠타입을 json으로
+    // xhr.send(JSON.stringify(data)); // 데이터를 stringify해서 보냄
+
+    var xhr = new XMLHttpRequest();
+    var formData = new FormData();
+    formData.append("name", "zerocho");
+    formData.append("birth", 1994);
+    xhr.onload = function () {
+      if (xhr.status === 200 || xhr.status === 201) {
+        console.log(xhr.responseText);
+      } else {
+        console.error(xhr.responseText);
+      }
+    };
+    xhr.open("POST", "/formFile");
+    xhr.send(formData); // 폼 데이터 객체 전송 별도로 header 설정을 할 필요 없이 그냥 formData를 보내주면 됩니다. 더 간단하죠? 자동으로 Content-type이 multipart/form-data가 됩니다.
+  }
+  function ajaxFile() {
+    // var file = this.files[0];
+    var file = $("#file")[0].files[0];
+    //- formData.append('file', $("#uploadnewphoto")[0].files[0]);
+
+    var formData = new FormData($("form")[0]);
+    // debugger
+
+    console.log("all form data", [...formData.keys()]);
+    console.log("🚀 ~ ajaxFile ~ formData", formData);
+
+    $.ajax({
+      url: "/formFile",
+      type: "POST",
+      contentType: false, //- contentType : false 로 선언 시 content-type 헤더가 multipart/form-data로 전송되게 함
+      processData: false, //- processData : false로 선언 시 formData를 string으로 변환하지 않음
+      data: formData,
+      success: function (result) {
+        console.log("🚀 ~ ajaxFile ~ result", result);
+      },
+      error: function (req, status, err) {
+        //- alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+        $("#errormsg").html("code:" + status + "\n" + "message:" + req.responseText + "\n" + "error:" + err);
+      },
+    });
+  }
+
+  function postJson() {
+    const data = {
+      name: "song",
+      age: 22,
+    };
+
+    const jsonData = JSON.stringify(data); // '{"name":"song","age":22}'
+    const urlEncodingData = new URLSearchParams(data).toString(); // 'name=song&age=22'
+
+    fetch("/json", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: jsonData,
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        console.log("GOT");
+        console.log(d);
+      });
+  }
+  function postXXX() {
+    const data = {
+      name: "song",
+      age: 22,
+    };
+    const jsonData = JSON.stringify(data); // '{"name":"song","age":22}'
+    const urlEncodingData = new URLSearchParams(data).toString(); // 'name=song&age=22'
+
+    fetch("/json", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+
+      body: urlEncodingData,
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        console.log("GOT");
+        console.log(d);
+      });
+  }
+</script>

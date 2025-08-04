@@ -1,0 +1,277 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- <script src="/node_modules/from-json-to-html/src/index.js"></script> -->
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"
+      integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g=="
+      crossorigin="anonymous"
+    ></script>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.0/axios.js"
+      integrity="sha512-nNH8gXanGmEPnnK9/yhI3ETaIrujVVJ7dstiVIwMtcfbcj1zzTlnH5whbsYhg6ihg5mFe1xNkPPLwCwwvSAUdQ=="
+      crossorigin="anonymous"
+    ></script>
+
+    <style>
+      table {
+        table-layout: fixed;
+      }
+
+      .tdw5 {
+        width: 500px;
+        word-break: break-all;
+      }
+      td {
+        word-break: break-all;
+
+        /* min-width: 100px;
+      max-width: 500px; */
+      }
+
+      .w100 {
+        width: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>hihi ktlogin.html 갱신하고나면</h1>
+    <pre>
+      os랑 appVersion은 파일말고 그냥 api에서 고정해서 쏘고있음
+
+      if (userLoginObj.targetUrl.includes("tb")) {
+        userLoginObj.headers.os = "android";
+        userLoginObj.headers.appVersion = "23.02.01";
+      } else {
+        userLoginObj.headers.os = "ios";
+        userLoginObj.headers.appVersion = "23.04.01";
+      }
+
+      						
+      아이디	패스워드	MBR ID	CDM ID	등급	출생년월일	크리덴셜ID
+      ktmtbtest01	new!1234	7901041V00713	CG8KZUDGHYW	White	1979. 1. 4	80000623043
+      ktmtbtest02	new!1234	8506221V00258	F76CKSHBG5	일반	1985. 6. 22	80000624044
+      ktmtbtest03	new!1234	7501041V00747	UH4KES0PI18	Silver	1975. 1. 4	80000624046
+      ktmtbtest04	new!1234	7310022V01050	0EZTDC0IEJP	Gold	1973. 10. 2	80000624047
+      ktmtbtest05	new!1234	9999991Vt9005	TESTCDMID05	Vip	2000. 3. 1	80000624048
+      ktmtbtest06	new!1234	9999991Vt9006	TESTCDMID06	VVip	1972. 5. 1	80000624049
+      ktmtbtest07	new!1234	9999991Vt9007	TESTCDMID07	Vip	2008. 7. 1	80000624051
+  
+      
+    </pre>
+    
+    <a href="/ktmem/all" target="_blank">모든멤버</a>
+
+    <table width="100%" border="1px" style="max-width: 1250px;">
+      <tbody>
+        <tr>
+          <td class="w100">&nbsp;</td>
+          <td class="w100">마지막 갱신</td>
+          <td class="w100">갱신 하기</td>
+          <td class="w100">데이터보기</td>
+          <td class="tdw5">userInfo - headerValue</td>
+          <td class="tdw5">headerValue</td>
+        </tr>
+        <!-- <tr>
+      <td >이름1</td>
+      <td >1924 ---</td>
+      <td >gogo click</td>
+      <td class="tdw5">VITE_headerValue={"autoLogin":"","gradeCd":"","rsaYn":"Y","advertIdAgreeYn":"Y","os":"android","deviceId":"ozTtS6itMCf39IUh7bm4vURUbk0LyCss7S9SDo8Dj7mfJW6EHSZ0%2BIkCALXoGSaZ","appVersion":"22.06.02","osVersion":"12","memToken":"eyJhbGciOiJIUzI1NiJ9.eyIxIjoiNEklMkI0dlJzUUF3SFhkSzhGV0hsTmZRJTNEJTNEIiwiMiI6ImlCMWx6cWxBVzVSTE9sUmElMkZFR2pkJTJGTUN4WVZOcFVIZmNKJTJGR3dSMSUyQlVrJTJGc0plQ010aDRwcXBtckZ1Smc4bVJ1QVpMazlndldNTm1udG44WjVpeVFwRTdFdXNKb3h5dndGWVJ2RndlQiUyRjJzJTNEIiwiMyI6InBMSzhmRE5RN2ZkbksxRDFkTW1xRmclM0QlM0QifQ.mCT6ZDd-f048P8a2iRrtS46aYDpJwm905u5Z40FTwtU","authKey":"sYBffPrEkaZRVdJRruuhyTCGcwFNzGYE","encMemberId":"VoW1vaxtdVENmdcjRP0pqA%3D%3D","encMemberType":"dopRbwXCl7xmgMOFF%2FSdNQ%3D%3D","gradeNm":"VIP","encCrId":"E5YBcpDgWVRZQuKkMrOF6Q%3D%3D","memTokenExpireTime":"20221117130145"}</td>
+      <td class="tdw5">VITE_headerValue={"autoLogin":"","gradeCd":"","rsaYn":"Y","advertIdAgreeYn":"Y","os":"android","deviceId":"ozTtS6itMCf39IUh7bm4vURUbk0LyCss7S9SDo8Dj7mfJW6EHSZ0%2BIkCALXoGSaZ","appVersion":"22.06.02","osVersion":"12","memToken":"eyJhbGciOiJIUzI1NiJ9.eyIxIjoiNEklMkI0dlJzUUF3SFhkSzhGV0hsTmZRJTNEJTNEIiwiMiI6ImlCMWx6cWxBVzVSTE9sUmElMkZFR2pkJTJGTUN4WVZOcFVIZmNKJTJGR3dSMSUyQlVrJTJGc0plQ010aDRwcXBtckZ1Smc4bVJ1QVpMazlndldNTm1udG44WjVpeVFwRTdFdXNKb3h5dndGWVJ2RndlQiUyRjJzJTNEIiwiMyI6InBMSzhmRE5RN2ZkbksxRDFkTW1xRmclM0QlM0QifQ.mCT6ZDd-f048P8a2iRrtS46aYDpJwm905u5Z40FTwtU","authKey":"sYBffPrEkaZRVdJRruuhyTCGcwFNzGYE","encMemberId":"VoW1vaxtdVENmdcjRP0pqA%3D%3D","encMemberType":"dopRbwXCl7xmgMOFF%2FSdNQ%3D%3D","gradeNm":"VIP","encCrId":"E5YBcpDgWVRZQuKkMrOF6Q%3D%3D","memTokenExpireTime":"20221117130145"}</td>
+    </tr> -->
+        <tr></tr>
+      </tbody>
+    </table>
+
+    <script>
+      let usersObj = {};
+      async function getusers() {
+        usersObj = await fetch("/ktmem/all").then((r) => r.json());
+
+        const useLi = Object.entries(usersObj);
+        console.log("🚀 ~ #################### ~ useLi", useLi);
+        const useLi_1 = useLi.filter(
+          (user) => user[1].targetUrl === "http://tb.app.membership.kt.com/membershipv3/login"
+        );
+        console.log("🚀 ~ @@@@@@@@@ ~ useLi_1", useLi_1);
+        const useLi_1_1 = useLi_1.filter((user) => user[1].namename.includes("ktmtbtes"));
+        const useLi_1_2 = useLi_1.filter((user) => !user[1].namename.includes("ktmtbtes"));
+        const useLi_2 = useLi.filter(
+          (user) => user[1].targetUrl !== "http://tb.app.membership.kt.com/membershipv3/login"
+        );
+
+        const allUsers = [...useLi_1_1, ...useLi_1_2, ...useLi_2];
+        console.log("🚀 ~ ^^^^^^^^^^^^^^ ~ wer ", allUsers);
+        usersObj = Object.fromEntries(allUsers);
+
+        console.log("🚀 ~ getusers ~ usersObj", usersObj);
+        const userLi = Object.keys(usersObj);
+        console.log("🚀 ~ getusers ~ userLi", userLi);
+
+        const trHtml = $(`
+              <tr>
+                <td>이름1</td>
+                <td>1924 ---</td>
+                <td>gogo click</td>
+                <tdclass="tdw5">VITE_headerValue={"autoLogin":"","gradeCd":"","rsaYn":"Y","advertIdAgreeYn":"Y","os":"android","deviceId":"ozTtS6itMCf39IUh7bm4vURUbk0LyCss7S9SDo8Dj7mfJW6EHSZ0%2BIkCALXoGSaZ","appVersion":"22.06.02","osVersion":"12","memToken":"eyJhbGciOiJIUzI1NiJ9.eyIxIjoiNEklMkI0dlJzUUF3SFhkSzhGV0hsTmZRJTNEJTNEIiwiMiI6ImlCMWx6cWxBVzVSTE9sUmElMkZFR2pkJTJGTUN4WVZOcFVIZmNKJTJGR3dSMSUyQlVrJTJGc0plQ010aDRwcXBtckZ1Smc4bVJ1QVpMazlndldNTm1udG44WjVpeVFwRTdFdXNKb3h5dndGWVJ2RndlQiUyRjJzJTNEIiwiMyI6InBMSzhmRE5RN2ZkbksxRDFkTW1xRmclM0QlM0QifQ.mCT6ZDd-f048P8a2iRrtS46aYDpJwm905u5Z40FTwtU","authKey":"sYBffPrEkaZRVdJRruuhyTCGcwFNzGYE","encMemberId":"VoW1vaxtdVENmdcjRP0pqA%3D%3D","encMemberType":"dopRbwXCl7xmgMOFF%2FSdNQ%3D%3D","gradeNm":"VIP","encCrId":"E5YBcpDgWVRZQuKkMrOF6Q%3D%3D","memTokenExpireTime":"20221117130145"}</tdclass=>
+                <tdclass="tdw5">VITE_headerValue={"autoLogin":"","gradeCd":"","rsaYn":"Y","advertIdAgreeYn":"Y","os":"android","deviceId":"ozTtS6itMCf39IUh7bm4vURUbk0LyCss7S9SDo8Dj7mfJW6EHSZ0%2BIkCALXoGSaZ","appVersion":"22.06.02","osVersion":"12","memToken":"eyJhbGciOiJIUzI1NiJ9.eyIxIjoiNEklMkI0dlJzUUF3SFhkSzhGV0hsTmZRJTNEJTNEIiwiMiI6ImlCMWx6cWxBVzVSTE9sUmElMkZFR2pkJTJGTUN4WVZOcFVIZmNKJTJGR3dSMSUyQlVrJTJGc0plQ010aDRwcXBtckZ1Smc4bVJ1QVpMazlndldNTm1udG44WjVpeVFwRTdFdXNKb3h5dndGWVJ2RndlQiUyRjJzJTNEIiwiMyI6InBMSzhmRE5RN2ZkbksxRDFkTW1xRmclM0QlM0QifQ.mCT6ZDd-f048P8a2iRrtS46aYDpJwm905u5Z40FTwtU","authKey":"sYBffPrEkaZRVdJRruuhyTCGcwFNzGYE","encMemberId":"VoW1vaxtdVENmdcjRP0pqA%3D%3D","encMemberType":"dopRbwXCl7xmgMOFF%2FSdNQ%3D%3D","gradeNm":"VIP","encCrId":"E5YBcpDgWVRZQuKkMrOF6Q%3D%3D","memTokenExpireTime":"20221117130145"}</tdclass=>
+              </tr>
+            `);
+
+        const result = userLi.map((userNm) => {
+          const user = usersObj[userNm];
+          // console.log("🚀 ~ result ~ user", user);
+
+          let humanDiff = "^^";
+          if (user?.lastRefreshed) {
+            const t1 = new Date(user.lastRefreshed); // your initial time
+            const t2 = Date.now(); // your later time
+
+            const diff = t2 - t1;
+            const SEC = 1000,
+              MIN = 60 * SEC,
+              HRS = 60 * MIN;
+            // const humanDiff = `${Math.floor(diff/HRS)}:${Math.floor((diff%HRS)/MIN).toLocaleString('en-US', {minimumIntegerDigits: 2})}:${Math.floor((diff%MIN)/SEC).toLocaleString('en-US', {minimumIntegerDigits: 2})}.${Math.floor(diff % SEC).toLocaleString('en-US', {minimumIntegerDigits: 4, useGrouping: false})}`
+            humanDiff = `${Math.floor(diff / HRS)}:${Math.floor((diff % HRS) / MIN).toLocaleString("en-US", {
+              minimumIntegerDigits: 2,
+            })}`;
+          }
+
+          // console.log("humanDiff:", humanDiff);
+          const trHtml = `
+                <tr>
+                  <td data-nm=${userNm} class="ktlog">${userNm}-${user.namename} </br></br> ${user.targetUrl}</td>
+                  <td>${user.lastRefreshed} -</br></br> ${humanDiff} 분전</td>
+                  <td data-nm=${userNm} class="ktreload"><button>gogo click</button></td>
+                  <td data-nm=${userNm} ><a target="_blank" href="/ktmem/${userNm}?reload=N"><button>gogo click</button></a></td>
+                  <td class="tdw5">VITE_userInfo=${user.VITE_userInfo || "-"} </br></br> VITE_headerValue=${
+            user.VITE_headerValue || "-"
+          } </td>
+                  <td class="tdw5">
+
+                    <button data-nm=${userNm} class="couponApi">계정필요한 쿠폰 api 쏘기 </button></br></br></br>
+                    <p>${user.targetUrl}/user/point</p>
+                    <p>user.headerValue.authKey >> ${user.headerValue?.authKey}</p>
+                    <p>user.headerValue.encMemberId >> ${user.headerValue?.encMemberId}</p>
+                    <p>user.headerValue.encMemberType >> ${user.headerValue?.encMemberType}</p>
+                    <pre style='font-size: 20px; white-space: pre-wrap;'>
+authKey: ${user.headerValue?.authKey}
+encMemberId: ${user.headerValue?.encMemberId}
+encMemberType: ${user.headerValue?.encMemberType}
+memToken: ${user.headerValue?.memToken}
+deviceId: ${user.headerValue?.deviceId}
+
+authKey: ${user.headerValue?.authKey}
+memToken: ${user.headerValue?.memToken}
+
+                    </pre>
+                    </td>
+                </tr>
+              `;
+
+          return trHtml;
+        });
+        // console.log("🚀 ~ result ~ result", result);
+        $("tbody").empty();
+        $("tbody").append($(result.join("")));
+      }
+
+      function goClick() {
+        console.log($(this));
+      }
+
+      $(function () {
+        // $(document, ".ktkt", function(){
+        // console.log($(this));
+
+        // })
+
+        $(document).on("click", ".ktreload", function () {
+          const td = $(this);
+          const userNm = td.data("nm");
+          console.log("🚀 ~ userNm", userNm);
+          const userData = usersObj[userNm];
+          console.log("🚀 ~ userData", userData);
+
+          axios
+            .get(`ktmem/${userNm}?reload=Y`)
+            .then((r) => {
+              console.log("🚀 ~ fetch ~ r", r);
+              getusers();
+              // location.reload();
+            })
+            .catch((err) => {
+              // res.status(500)을 하던 404를 하던 fetch의 catch로는 못오고
+              // 서버 리턴에서 바로 throw new Error("ZZ") 떄리면 catch태울수있는듯?? 그래도 에러내용 ZZ는 못보고
+              // 대충에러가 $(document).on("click"...)로 시작해서그런지  ***>>>*** TypeError: Failed to fetch >> at HTMLTableCellElement.<anonymous> (ktlogin.html:153:11) >> at HTMLDocument.dispatch (jquery.js:5430:27) >> at elemData.handle (jquery.js:5234:28)
+              console.log("fetch의 에러 catch", err.response.data);
+              alert("에러남 " + JSON.stringify(err.response.data));
+            });
+          // usersObj = await fetch("/ktmem/all").then(r=>r.json());
+        });
+
+        $(document).on("click", ".ktlog", function () {
+          const td = $(this);
+          const userNm = td.data("nm");
+          const userData = usersObj[userNm];
+          console.log("🚀 ~ userData", userData);
+        });
+        $(document).on("click", ".couponApi", function () {
+          const td = $(this);
+          const userNm = td.data("nm");
+          const userData = usersObj[userNm];
+
+          //baseUrl:"http://tb.app.membership.kt.com/membershipv3",
+          const endPoint = `${userData.baseUrl}/user/point`;
+
+          const jsonBody = {
+            endPoint: endPoint,
+            method: "GET",
+            headerData: {
+              Accept: "application/json",
+              os: userData.headerValue.os, //"android",
+              appVersion: userData.headerValue.appVersion, //"22.06.02",
+              authKey: userData.userInfo.authKey, //"vjBHXWmReuUQJshNmYdGRUszGudFcVWi",
+              encMemberId: userData.userInfo.memberId, //"VoW1vaxtdVENmdcjRP0pqA%3D%3D",
+              encMemberType: userData.userInfo.memberType, //"dopRbwXCl7xmgMOFF%2FSdNQ%3D%3D",
+            },
+            bodyData: "",
+          };
+          // axios.post("/skipCors", jsonBody).then((r) => {
+          //   console.log("🚀 ~ skipCors으로 프록시 걸어서 해버렸지 모얌~~ ~ r", r);
+          // });
+
+          fetch("/skipCors", {
+            method: "POST", // *GET, POST, PUT, DELETE, etc.
+            // mode: 'cors', // no-cors, *cors, same-origin
+            // cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+            // credentials: 'same-origin', // include, *same-origin, omit
+            headers: {
+              "Content-Type": "application/json",
+              // 'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            // redirect: 'follow', // manual, *follow, error
+            // referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+            body: JSON.stringify(jsonBody), // body data type must match "Content-Type" header
+          })
+            .then((r) => r.json())
+            .then((result) => {
+              console.log("🚀 ~ 프록시돌린 result", result);
+              alert(JSON.stringify(result))
+            });
+
+          console.log("🚀 ~ apid에 사용된 유저 데이터 userData", userData);
+
+        });
+
+        getusers();
+      });
+    </script>
+  </body>
+</html>

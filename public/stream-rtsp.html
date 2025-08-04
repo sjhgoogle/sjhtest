@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JSMpeg</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@cycjimmy/jsmpeg-player@6/dist/jsmpeg-player.umd.min.js"></script> -->
+    <script src="/lib/jsmpeg.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+      canvas {
+        width: 500px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>rtsp -> ffmpeg -> nodejs websocket -> jsmpeg 로 변환해 html에서 띄우기</h1>
+    <p>철도 인천 cctv</p>
+
+    <canvas id="defaultCanvas" class="border border-5 border-primary"></canvas>
+    <canvas id="liveVideo" class="border border-5 border-primary"></canvas>
+
+    <p onclick="playLink('rtsp://210.99.70.120:1935/live/cctv001.stream')">
+      const streamUrl = "rtsp://210.99.70.120:1935/live/cctv001.stream";
+    </p>
+    <p onclick="playLink('rtsp://210.99.70.120:1935/live/cctv004.stream')">
+      const streamUrl = "rtsp://210.99.70.120:1935/live/cctv004.stream";
+    </p>
+
+    <div class="input-group mb-3">
+      <button onclick="playLink();" class="btn btn-primary" type="button">Button</button>
+      <input
+        id="url-input"
+        onkeyup="window.event.keyCode === 13 && playLink()"
+        type="text"
+        class="form-control"
+        value="rtsp://210.99.70.120:1935/live/cctv001.stream"
+      />
+    </div>
+
+    <script>
+      let canvasPlayer;
+      const DEFAULT_LIVE_URL = "rtsp://210.99.70.120:1935/live/cctv001.stream";
+      createPlayer(DEFAULT_LIVE_URL, document.getElementById("defaultCanvas"));
+
+      function playLink(link) {
+        if (!link) {
+          link = $("#url-input").val().trim();
+        }
+
+        if (canvasPlayer) {
+          canvasPlayer.destroy();
+        }
+
+        canvasPlayer = createPlayer(link, document.getElementById("liveVideo"));
+      }
+
+      function createPlayer(url, canvas) {
+        const wsUrl = `ws://${location.hostname}:19002`;
+        try {
+          return new JSMpeg.Player(`${wsUrl}?url=${encodeURIComponent(url)}`, {
+            canvas: canvas,
+            autoplay: false,
+            audio: false,
+            videoBufferSize: 10 * 1024 * 1024,
+            // reconnectInterval: 0,
+            disableWebAssembly: true,
+            // disableGl: true,
+            onSourceEstablished: (data) => {
+              console.log("onSourceEstablished", data);
+
+              data.socket.onclose = (closeEvent) => {
+                console.log("socket onclose", closeEvent);
+                if (closeEvent.reason) {
+                  alert(closeEvent.reason);
+                }
+              };
+
+              data.socket.onerror = (error) => {
+                console.log("socket on error", error);
+              };
+            },
+            onCompletedCallback: (data) => {
+              console.log("onCompletedCallback", data);
+            },
+          });
+        } catch (error) {
+          console.log("catched error", error);
+        }
+      }
+    </script>
+
+    <div>
+      <pre>
+    CCTV관리번호	경도	위도	설치위치명	설치위치주소	스트리밍 프로토콜(RTSP)주소	스트리밍 프로토콜(RTMP)주소	스트리밍 프로토콜(HTTP)주소	데이터기준일자
+    CCTV001	127.1504447	36.8625719	세집매 삼거리	충청남도 천안시 서북구 신당동 482-22	rtsp://210.99.70.120:1935/live/cctv001.stream	rtmp://210.99.70.120/live/cctv001.stream	http://210.99.70.120:1935/live/cctv001.stream/playlist.m3u8	2022-09-22
+    CCTV002	127.1409331	36.8105742	서부역 입구 삼거리	충청남도 천안시 서북구 성정동 214-1	rtsp://210.99.70.120:1935/live/cctv002.stream	rtmp://210.99.70.120/live/cctv002.stream	http://210.99.70.120:1935/live/cctv002.stream/playlist.m3u8	2022-09-22
+    CCTV003	127.1531387	36.8249888	역말 오거리	충청남도 천안시 동남구 단대로 11	rtsp://210.99.70.120:1935/live/cctv003.stream	rtmp://210.99.70.120/live/cctv003.stream	http://210.99.70.120:1935/live/cctv003.stream/playlist.m3u8	2022-09-22
+    CCTV004	127.1625436	36.8218382	천안로사거리	충청남도 천안시 동남구 신부동 433-4	rtsp://210.99.70.120:1935/live/cctv004.stream	rtmp://210.99.70.120/live/cctv004.stream	http://210.99.70.120:1935/live/cctv004.stream/playlist.m3u8	2022-09-22
+    CCTV005	127.1738124	36.833742	상명대 입구 삼거리	충청남도 천안시 동남구 안서동 506-5	rtsp://210.99.70.120:1935/live/cctv005.stream	rtmp://210.99.70.120/live/cctv005.stream	http://210.99.70.120:1935/live/cctv005.stream/playlist.m3u8	2022-09-22
+    CCTV006	127.1518748	36.8188281	방죽안오거리	충청남도 천안시 동남구 신부동 391-3	rtsp://210.99.70.120:1935/live/cctv006.stream	rtmp://210.99.70.120/live/cctv006.stream	http://210.99.70.120:1935/live/cctv006.stream/playlist.m3u8	2022-09-22
+    CCTV007	127.1480679	36.8095904	천안역	충청남도 천안시 동남구 공설시장1길 15-1	rtsp://210.99.70.120:1935/live/cctv007.stream	rtmp://210.99.70.120/live/cctv007.stream	http://210.99.70.120:1935/live/cctv007.stream/playlist.m3u8	2022-09-22
+    CCTV008	127.1535502	36.7983562	남부오거리	충청남도 천안시 동남구 영성동 168-3	rtsp://210.99.70.120:1935/live/cctv008.stream	rtmp://210.99.70.120/live/cctv008.stream	http://210.99.70.120:1935/live/cctv008.stream/playlist.m3u8	2022-09-22
+    CCTV009	127.1588667	36.8064803	교보사거리	충청남도 천안시 동남구 옛농고9길 13	rtsp://210.99.70.120:1935/live/cctv009.stream	rtmp://210.99.70.120/live/cctv009.stream	http://210.99.70.120:1935/live/cctv009.stream/playlist.m3u8	2022-09-22
+    CCTV010	127.1654859	36.7821278	청삼교차로	충청남도 천안시 동남구 삼룡동 401-7	rtsp://210.99.70.120:1935/live/cctv010.stream	rtmp://210.99.70.120/live/cctv010.stream	http://210.99.70.120:1935/live/cctv010.stream/playlist.m3u8	2022-09-22
+    CCTV011	127.1180694	36.7865645	신방삼거리	충청남도 천안시 동남구 신방동 791-6	rtsp://210.99.70.120:1935/live/cctv011.stream	rtmp://210.99.70.120/live/cctv011.stream	http://210.99.70.120:1935/live/cctv011.stream/playlist.m3u8	2022-09-22
+    CCTV012	127.1271973	36.7948239	이마트 사거리	충청남도 천안시 서북구 서부대로 298	rtsp://210.99.70.120:1935/live/cctv012.stream	rtmp://210.99.70.120/live/cctv012.stream	http://210.99.70.120:1935/live/cctv012.stream/playlist.m3u8	2022-09-22
+    CCTV013	127.1266916	36.7997173	쌍용사거리	충청남도 천안시 서북구 쌍용동 515-3	rtsp://210.99.70.120:1935/live/cctv013.stream	rtmp://210.99.70.120/live/cctv013.stream	http://210.99.70.120:1935/live/cctv013.stream/playlist.m3u8	2022-09-22
+    CCTV014	127.1328197	36.807489	봉서사거리	충청남도 천안시 동남구 봉명로 53	rtsp://210.99.70.120:1935/live/cctv014.stream	rtmp://210.99.70.120/live/cctv014.stream	http://210.99.70.120:1935/live/cctv014.stream/playlist.m3u8	2022-09-22
+    CCTV015	127.1356607	36.8183333	구상골 사거리	충청남도 천안시 서북구 쌍용대로 230	rtsp://210.99.70.120:1935/live/cctv015.stream	rtmp://210.99.70.120/live/cctv015.stream	http://210.99.70.120:1935/live/cctv015.stream/playlist.m3u8	2022-09-22
+    CCTV016	127.1444072	36.8254002	인쇄창사거리	충청남도 천안시 서북구 성정동 500-5	rtsp://210.99.70.120:1935/live/cctv016.stream	rtmp://210.99.70.120/live/cctv016.stream	http://210.99.70.120:1935/live/cctv016.stream/playlist.m3u8	2022-09-22
+    CCTV017	127.1382514	36.8336751	부성초교사거리	충청남도 천안시 서북구 두정중 8길 1-4	rtsp://210.99.70.120:1935/live/cctv017.stream	rtmp://210.99.70.120/live/cctv017.stream	http://210.99.70.120:1935/live/cctv017.stream/playlist.m3u8	2022-09-22
+    CCTV018	127.1329813	36.8264833	극동사거리	충청남도 천안시 서북구 성정동 1544	rtsp://210.99.70.120:1935/live/cctv018.stream	rtmp://210.99.70.120/live/cctv018.stream	http://210.99.70.120:1935/live/cctv018.stream/playlist.m3u8	2022-09-22
+    CCTV019	127.1235198	36.8236502	백석삼거리	충청남도 천안시 서북구 백석동 774	rtsp://210.99.70.120:1935/live/cctv019.stream	rtmp://210.99.70.120/live/cctv019.stream	http://210.99.70.120:1935/live/cctv019.stream/playlist.m3u8	2022-09-22
+    CCTV020	127.1118298	36.822612	운동장 사거리	충청남도 천안시 서북구 백석동 729	rtsp://210.99.70.120:1935/live/cctv020.stream	rtmp://210.99.70.120/live/cctv020.stream	http://210.99.70.120:1935/live/cctv020.stream/playlist.m3u8	2022-09-22
+    CCTV021	127.1152323	36.8014566	쌍용도서관 삼거리	충청남도 천안시 서북구 불당동 791	rtsp://210.99.70.120:1935/live/cctv021.stream	rtmp://210.99.70.120/live/cctv021.stream	http://210.99.70.120:1935/live/cctv021.stream/playlist.m3u8	2022-09-22
+    CCTV022	127.1148578	36.8113265	동일하이빌 삼거리	충청남도 천안시 서북구 불당동 246-30	rtsp://210.99.70.120:1935/live/cctv022.stream	rtmp://210.99.70.120/live/cctv022.stream	http://210.99.70.120:1935/live/cctv022.stream/playlist.m3u8	2022-09-22
+    CCTV023	127.1059202	36.8019174	고속철 입구	충청남도 천안시 서북구 불당동 1269	rtsp://210.99.70.120:1935/live/cctv023.stream	rtmp://210.99.70.120/live/cctv023.stream	http://210.99.70.120:1935/live/cctv023.stream/playlist.m3u8	2022-09-22
+    CCTV024	127.1303245	36.8146659	개목삼거리	충청남도 천안시 동남구 봉명동 290	rtsp://210.99.70.120:1935/live/cctv024.stream	rtmp://210.99.70.120/live/cctv024.stream	http://210.99.70.120:1935/live/cctv024.stream/playlist.m3u8	2022-09-22
+    CCTV025	127.146534	36.7847639	우미린A 삼거리	충청남도 천안시 동남구 청당동 455	rtsp://210.99.70.120:1935/live/cctv025.stream	rtmp://210.99.70.120/live/cctv025.stream	http://210.99.70.120:1935/live/cctv025.stream/playlist.m3u8	2022-09-22
+    CCTV026	127.1524154	36.7840601	세무서	충청남도 천안시 동남구 청당동 490	rtsp://210.99.70.120:1935/live/cctv026.stream	rtmp://210.99.70.120/live/cctv026.stream	http://210.99.70.120:1935/live/cctv026.stream/playlist.m3u8	2022-09-22
+    CCTV027	127.157915	36.7860367	청수 국민은행	충청남도 천안시 동남구 청당동 718	rtsp://210.99.70.120:1935/live/cctv027.stream	rtmp://210.99.70.120/live/cctv027.stream	http://210.99.70.120:1935/live/cctv027.stream/playlist.m3u8	2022-09-22
+    CCTV028	127.0993324	36.8001466	펜타포트 사거리	충청남도 천안시 서북구 불당동 1447	rtsp://210.99.70.120:1935/live/cctv028.stream	rtmp://210.99.70.120/live/cctv028.stream	http://210.99.70.120:1935/live/cctv028.stream/playlist.m3u8	2022-09-22
+    CCTV029	127.0977107	36.795138	생태터널사거리	충청남도 천안시 서북구 불당동 1288	rtsp://210.99.70.120:1935/live/cctv029.stream	rtmp://210.99.70.120/live/cctv029.stream	http://210.99.70.120:1935/live/cctv029.stream/playlist.m3u8	2022-09-22
+    CCTV030	127.1120176	36.8009504	원형육교	충청남도 천안시 서북구 불당동 1442	rtsp://210.99.70.120:1935/live/cctv030.stream	rtmp://210.99.70.120/live/cctv030.stream	http://210.99.70.120:1935/live/cctv030.stream/playlist.m3u8	2022-09-22
+    CCTV031	127.1644947	36.8064196	도로원점 삼거리	충청남도 천안시 동남구 천안대로 602-1	rtsp://210.99.70.120:1935/live/cctv031.stream	rtmp://210.99.70.120/live/cctv031.stream	http://210.99.70.120:1935/live/cctv031.stream/playlist.m3u8	2022-09-22
+    CCTV032	127.1463629	36.8767668	직산사거리	충청남도 천안시 서북구 직산읍 삼은리 227-2	rtsp://210.99.70.120:1935/live/cctv032.stream	rtmp://210.99.70.120/live/cctv032.stream	http://210.99.70.120:1935/live/cctv032.stream/playlist.m3u8	2022-09-22
+    CCTV033	127.1997565	36.8769768	저리 교차로	충청남도 천안시 서북구 성거읍 봉주로 465	rtsp://210.99.70.120:1935/live/cctv033.stream	rtmp://210.99.70.120/live/cctv033.stream	http://210.99.70.120:1935/live/cctv033.stream/playlist.m3u8	2022-09-22
+    CCTV034	127.1192816	36.8394213	성성고가교	충청남도 천안시 서북구 성성동 520-1	rtsp://210.99.70.120:1935/live/cctv034.stream	rtmp://210.99.70.120/live/cctv034.stream	http://210.99.70.120:1935/live/cctv034.stream/playlist.m3u8	2022-09-22
+    CCTV035	127.1706983	36.7451909	도장리	충청남도 천안시 동남구 목천읍 학수소사길 212	rtsp://210.99.70.120:1935/live/cctv035.stream	rtmp://210.99.70.120/live/cctv035.stream	http://210.99.70.120:1935/live/cctv035.stream/playlist.m3u8	2022-09-22
+    CCTV036	127.2343184	36.769469	예술의전당	충청남도 천안시 동남구 목천읍 운전리 산4-3	rtsp://210.99.70.120:1935/live/cctv036.stream	rtmp://210.99.70.120/live/cctv036.stream	http://210.99.70.120:1935/live/cctv036.stream/playlist.m3u8	2022-09-22
+    CCTV037	127.1343423	36.9362308	대홍교차로	충청남도 천안시 서북구 성환읍 성환리 537-1	rtsp://210.99.70.120:1935/live/cctv037.stream	rtmp://210.99.70.120/live/cctv037.stream	http://210.99.70.120:1935/live/cctv037.stream/playlist.m3u8	2022-09-22
+    CCTV038	127.1663049	36.8284295	단대입구 사거리	충청남도 천안시 동남구 신부동 191-9	rtsp://210.99.70.120:1935/live/cctv038.stream	rtmp://210.99.70.120/live/cctv038.stream	http://210.99.70.120:1935/live/cctv038.stream/playlist.m3u8	2022-09-22
+    CCTV039	127.1592356	36.6889197	구정사거리	충청남도 천안시 동남구 광덕면 행정리 49-11	rtsp://210.99.70.120:1935/live/cctv039.stream	rtmp://210.99.70.120/live/cctv039.stream	http://210.99.70.120:1935/live/cctv039.stream/playlist.m3u8	2022-09-22
+    CCTV040	127.1499043	36.8063821	오룡지하차도	충청남도 천안시 동남구 오룡동 43-14	rtsp://210.99.70.120:1935/live/cctv040.stream	rtmp://210.99.70.120/live/cctv040.stream	http://210.99.70.120:1935/live/cctv040.stream/playlist.m3u8	2022-09-22
+    CCTV041	127.1450103	36.8065073	와촌초교	충청남도 천안시 동남구 와촌동 178	rtsp://210.99.70.120:1935/live/cctv041.stream	rtmp://210.99.70.120/live/cctv041.stream	http://210.99.70.120:1935/live/cctv041.stream/playlist.m3u8	2022-09-22
+    CCTV042	127.1025105	36.8250377	불당신도시 입구 삼거리	충청남도 천안시 서북구 불당동 7-19 불당신도시입구	rtsp://210.99.70.120:1935/live/cctv042.stream	rtmp://210.99.70.120/live/cctv042.stream	http://210.99.70.120:1935/live/cctv042.stream/playlist.m3u8	2022-09-22
+    CCTV043	127.1079532	36.8220088	푸르지오 106동 사거리	충청남도 천안시 서북구 불당동 1865 푸르지오106동	rtsp://210.99.70.120:1935/live/cctv043.stream	rtmp://210.99.70.120/live/cctv043.stream	http://210.99.70.120:1935/live/cctv043.stream/playlist.m3u8	2022-09-22
+    CCTV044	127.1005316	36.8174407	우미린 102동 사거리	충청남도 천안시 서북구 불당동 1877 우미린102동	rtsp://210.99.70.120:1935/live/cctv044.stream	rtmp://210.99.70.120/live/cctv044.stream	http://210.99.70.120:1935/live/cctv044.stream/playlist.m3u8	2022-09-22
+    CCTV045	127.1095666	36.8156227	시청사거리	충청남도 천안시 서북구 불당동 19-7	rtsp://210.99.70.120:1935/live/cctv045.stream	rtmp://210.99.70.120/live/cctv045.stream	http://210.99.70.120:1935/live/cctv045.stream/playlist.m3u8	2022-09-22
+    CCTV046	127.1051785	36.8131923	호반201동 사거리	충청남도 천안시 서북구 불당동 1883 호반201동	rtsp://210.99.70.120:1935/live/cctv046.stream	rtmp://210.99.70.120/live/cctv046.stream	http://210.99.70.120:1935/live/cctv046.stream/playlist.m3u8	2022-09-22
+    CCTV047	127.1014132	36.8085102	불당고	충청남도 천안시 서북구 불당동 1931	rtsp://210.99.70.120:1935/live/cctv047.stream	rtmp://210.99.70.120/live/cctv047.stream	http://210.99.70.120:1935/live/cctv047.stream/playlist.m3u8	2022-09-22
+    CCTV048	127.1070017	36.807447	불당현대 사거리	충청남도 천안시 서북구 불당동 722	rtsp://210.99.70.120:1935/live/cctv048.stream	rtmp://210.99.70.120/live/cctv048.stream	http://210.99.70.120:1935/live/cctv048.stream/playlist.m3u8	2022-09-22
+    CCTV049	127.2132356	36.775541	고속화도로입구삼거리	충청남도 천안시 동남구 목천읍 신계리 123-5	rtsp://210.99.70.120:1935/live/cctv049.stream	rtmp://210.99.70.120/live/cctv049.stream	http://210.99.70.120:1935/live/cctv049.stream/playlist.m3u8	2022-09-22
+    CCTV050	127.1285056	36.7861919	새말사거리	충청남도 천안시 동남구 신방동 111-1	rtsp://210.99.70.120:1935/live/cctv050.stream	rtmp://210.99.70.120/live/cctv050.stream	http://210.99.70.120:1935/live/cctv050.stream/playlist.m3u8	2022-09-22
+      </pre>
+    </div>
+  </body>
+</html>

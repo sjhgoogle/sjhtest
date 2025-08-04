@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <title>AES256 암호화/복호화</title>
+  <link
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+  rel="stylesheet"
+  integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+  crossorigin="anonymous"
+/>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js' integrity='sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==' crossorigin='anonymous'></script>
+</head>
+<body class="container-fluid">
+  <h1>AES 암호화 이용해 암/복호화</h1>
+
+  <div class="d-flex">
+    <textarea class="col-6" id="senior-text" cols="50" rows="10">
+      22DB5EC66FF4D454CEAD56F2972769DB
+      D0EC5CF249AE264778FDCDA170B9CDD8
+    </textarea>
+    <pre class="col-6" id="senior-pre"></pre>
+  </div>
+
+  <button onclick="decrypt2()">시니어이름 복호화</button>
+
+  <br>
+  <br>
+  <br>
+  
+  
+  <input style="width: 100%;" type="text" id="inputKey" value="realcastlemusiceniwillb987654321"></br>
+  <textarea id="plaintext"  rows="4" cols="50">{"userSeq":"USER_00000100"}</textarea>
+  <textarea id="encryptedText"  rows="4" cols="50" readonly></textarea><br>
+  <button onclick="encrypt()">암호화</button><br><br>
+  <textarea id="ciphertext" rows="4" cols="50">p7o2IbkXbnIJiUy8DIVLSL5wYYEL2a4C+QWFbn1Qwas=</textarea>
+  <textarea id="decryptedText" rows="4" cols="50" readonly></textarea><br>
+  <button onclick="decrypt()">복호화</button><br>
+
+  <script>
+    function encrypt() {
+      var inputKey = document.getElementById("inputKey").value || "realcastlemusiceniwillb987654321";
+      var plaintext = document.getElementById("plaintext").value;
+      var key = CryptoJS.enc.Utf8.parse(inputKey);
+      var encrypted = CryptoJS.AES.encrypt(plaintext, key, { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 });
+      document.getElementById("encryptedText").value = encrypted.toString();
+    }
+
+    function decrypt() {
+      var inputKey = document.getElementById("inputKey").value || "realcastlemusiceniwillb987654321";
+      var ciphertext = document.getElementById("ciphertext").value;
+      var key = CryptoJS.enc.Utf8.parse(inputKey);
+
+      const decryptOptions = { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 };
+
+      var decrypted = CryptoJS.AES.decrypt(ciphertext, key, decryptOptions);
+      document.getElementById("decryptedText").value = decrypted.toString(CryptoJS.enc.Utf8);
+    }
+
+  function decrypt2(){
+    const encryptedMessageList = $("#senior-text").val().trim().split("\n").map(n=> n.trim())
+    const key = "eoqkr!@340000000eoqkr!@340000000";
+
+    const encc = encryptedMessageList.map(enc => ([enc, decName(enc)]))
+    const re = Object.fromEntries(encc)
+    $("#senior-pre").text(JSON.stringify(re, null, 2))
+
+    function decName(seniorName){
+      // const IV = key.substring(0, 16);
+      const keyData = CryptoJS.enc.Utf8.parse(key);
+      const IVkeyData = CryptoJS.enc.Utf8.parse(key.substring(0, 16));
+      const decryptOptions = { iv: IVkeyData, padding: CryptoJS.pad.Pkcs7 };
+
+      const decrypted = CryptoJS.AES.decrypt({
+        ciphertext: CryptoJS.enc.Hex.parse(seniorName)
+      }, keyData, decryptOptions);
+
+      return (( decrypted.toString(CryptoJS.enc.Utf8)))
+    }
+  }
+
+  </script>
+</body>
+</html>

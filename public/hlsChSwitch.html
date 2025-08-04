@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>HLS Player with Quality Selector</title>
+  </head>
+  <body>
+    <h2>HLS Player with Quality Selector</h2>
+
+    <video id="video" controls width="720" height="480"></video>
+    <br />
+    <label for="qualitySelect">Select Quality:</label>
+    <select id="qualitySelect">
+      <option value="-1">Auto</option>
+    </select>
+
+    <input id="video-url" type="text" placeholder="URL" value="https://flicky-output.s3.ap-northeast-2.amazonaws.com/vv30s3/vv30s3.m3u8" />
+    <button onclick="loadUrl()" type="button">load url!!</button>
+
+    <pre id="output"></pre>
+
+    <h2>이거 하는 ffmpeg 명령어</h2>
+    <pre id="output2"></pre>
+
+    <p>
+      ffmpeg -i vv30s.mp4 -vf
+      "scale='if(gt(a,426/240),426,trunc(iw/2)*2)':'if(gt(a,426/240),trunc(ih/2)*2,240)'"
+      -c:a aac -ar 48000 -b:a 64k -c:v libx264 -profile:v main -crf 20 -g 48 -
+      keyint_min 48 -sc_threshold 0 -b:v 400k -hls_time 10 -hls_playlist_type
+      vod -hls_segment_filename output\vv30s_240p_%03d.ts output\vv30s_240p.m3u8
+    </p>
+    <p>
+      ffmpeg -i vv30s.mp4 -vf
+      "scale='if(gt(a,854/480),854,trunc(iw/2)*2)':'if(gt(a,854/480),trunc(ih/2)*2,480)'"
+      -c:a aac -ar 48000 -b:a 96k -c:v libx264 -profile:v main -crf 20 -g 48 -
+      keyint_min 48 -sc_threshold 0 -b:v 800k -hls_time 10 -hls_playlist_type
+      vod -hls_segment_filename output\vv30s_480p_%03d.ts output\vv30s_480p.m3u8
+    </p>
+    <p>
+      ffmpeg -i vv30s.mp4 -vf
+      "scale='if(gt(a,1280/720),1280,trunc(iw/2)*2)':'if(gt(a,1280/720),trunc(ih/2)*2,720)'"
+      -c:a aac -ar 48000 -b:a 128k -c:v libx264 -profile:v main -crf 20 -g 48
+      -keyint_min 48 -sc_threshold 0 -b:v 1500k -hls_time 10 -hls_playlist_type
+      vod -hls_segment_filename output\vv30s_720p_%03d.ts output\vv30s_720p.m3u8
+    </p>
+
+    <h2>
+      html,js 프리태그로넣기 - 백택(`), 백택달러($) 앞에 역슬레시쓰기, 닫는
+      스크랩트태그앞이 역슬레시
+    </h2>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <script>
+      const video = document.getElementById("video");
+      const qualitySelect = document.getElementById("qualitySelect");
+      //   const videoSrc = "hlsMedia/vv30s.m3u8";
+      //   const videoSrc = "http://192.168.0.50:8000/v1G_240p.m3u8";
+      //   const videoSrc = "http://192.168.0.50:8081/v1G_240p.m3u8";
+      let videoSrc = "hlsMedia/vv30s.m3u8";
+      // const videoSrc = "https://flicky-output.s3.ap-northeast-2.amazonaws.com/vv30s3/vv30s3.m3u8";
+
+      function loadUrl(){
+        videoSrc = document.getElementById("video-url").value;
+        playVideo(videoSrc);
+      }
+      
+      document.addEventListener("DOMContentLoaded", function () {
+        playVideo(videoSrc);
+      });
+
+      function playVideo(url = "") {
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(videoSrc);
+          hls.attachMedia(video);
+
+          hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            const levels = hls.levels;
+
+            qualitySelect.innerHTML = `<option value="-1">Auto</option>`;
+            // 해상도 옵션 추가
+            levels.forEach((level, index) => {
+              const option = document.createElement("option");
+              option.value = index;
+              option.text = `${level.height}p`;
+              qualitySelect.appendChild(option);
+            });
+
+            // 화질 변경 이벤트
+            qualitySelect.addEventListener("change", function () {
+              const selectedLevel = parseInt(qualitySelect.value);
+              hls.currentLevel = selectedLevel; // -1은 Auto
+            });
+
+            video.play();
+          });
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          video.src = videoSrc;
+          video.addEventListener("loadedmetadata", function () {
+            video.play();
+          });
+        } else {
+          alert("HLS is not supported in this browser.");
+        }
+      }
+    </script>
+
+    <script>
+      var str = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <title>HLS Player with Quality Selector</title>
+        </head>
+        <body>
+            <h2>HLS Player with Quality Selector</h2>
+
+            <video id="video" controls width="720" height="480"></video>
+            <br />
+            <label for="qualitySelect">Select Quality:</label>
+            <select id="qualitySelect">
+            <option value="-1">Auto</option>
+            </select>
+
+            <pre id="output"></pre>
+            <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"><\/script>
+            <script>
+            const video = document.getElementById("video");
+            const qualitySelect = document.getElementById("qualitySelect");
+            const videoSrc = "hlsMedia/vv30s.m3u8";
+            // const videoSrc = "https://flicky-output.s3.ap-northeast-2.amazonaws.com/vv30s3/vv30s3.m3u8";
+            // const videoSrc = "http://sjhtest.soland.co.kr/hlsMedia/vv30s.m3u8";
+
+            var lb = null;
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(videoSrc);
+                hls.attachMedia(video);
+
+                lb = hls;
+                hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                const levels = hls.levels;
+
+                // 해상도 옵션 추가
+                levels.forEach((level, index) => {
+                    const option = document.createElement("option");
+                    option.value = index;
+                    option.text = \`\${level.height}p\`;
+                    qualitySelect.appendChild(option);
+                });
+
+                // 화질 변경 이벤트
+                qualitySelect.addEventListener("change", function () {
+                    const selectedLevel = parseInt(qualitySelect.value);
+                    hls.currentLevel = selectedLevel; // -1은 Auto
+                });
+
+                video.play();
+                });
+            } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+                video.src = videoSrc;
+                video.addEventListener("loadedmetadata", function () {
+                video.play();
+                });
+            } else {
+                alert("HLS is not supported in this browser.");
+            }
+            <\/script>
+
+        </body>
+        </html>
+
+        `;
+      document.getElementById("output").textContent = str;
+
+      var str2 = `
+        const { exec } = require("child_process");
+        const fs = require("fs");
+        const path = require("path");
+
+        const inputFile = "vv30s.mp4";
+        const outputDir = "output";
+
+        // 확장자 뺀 파일명 추출
+        const filename = path.parse(inputFile).name;
+
+        const variants = [
+        {
+            name: "240p",
+            width: 426,
+            height: 240,
+            videoBitrate: "400k",
+            audioBitrate: "64k",
+            bandwidth: 400000,
+        },
+        {
+            name: "480p",
+            width: 854,
+            height: 480,
+            videoBitrate: "800k",
+            audioBitrate: "96k",
+            bandwidth: 800000,
+        },
+        {
+            name: "720p",
+            width: 1280,
+            height: 720,
+            videoBitrate: "1500k",
+            audioBitrate: "128k",
+            bandwidth: 1500000,
+        },
+        ];
+
+        function createVariant(variant, callback) {
+        // 여기서 파일명 포맷 반영
+        const playlistName = \`\${filename}_\${variant.name}.m3u8\`;
+        const segmentName = \`\${filename}_\${variant.name}_%03d.ts\`;
+
+        const cmd = \`ffmpeg -i \${inputFile} -vf "scale='if(gt(a,\${variant.width}/\${
+            variant.height
+        }),\${variant.width},trunc(iw/2)*2)':'if(gt(a,\${variant.width}/\${
+            variant.height
+        }),trunc(ih/2)*2,\${variant.height})'" -c:a aac -ar 48000 -b:a \${
+            variant.audioBitrate
+        } -c:v libx264 -profile:v main -crf 20 -g 48 -keyint_min 48 -sc_threshold 0 -b:v \${
+            variant.videoBitrate
+        } -hls_time 10 -hls_playlist_type vod -hls_segment_filename \${path.join(
+            outputDir,
+            segmentName
+        )} \${path.join(outputDir, playlistName)}\`;
+
+        console.log(\`Running: \${cmd}\`);
+        console.log(\`Running: \${cmd}\`);
+        console.log(\`Running: \${cmd}\`);
+        console.log(\`Running: \${cmd}\`);
+        exec(cmd, (error, stdout, stderr) => {
+            if (error) {
+            console.error(\`Error creating \${variant.name} variant:\`, error);
+            callback(error);
+            return;
+            }
+            console.log(\`\${variant.name} variant created.\`);
+            callback(null);
+        });
+        }
+
+
+        // ffmpeg 
+        // -i vv30s.mp4 
+        // -vf "scale='if(gt(a,854/480),854,trunc(iw/2)*2)':'if(gt(a,854/480),trunc(ih/2)*2,480)'" 
+        // -c:a aac 
+        // -ar 48000 
+        // -b:a 96k 
+        // -c:v libx264 
+        // -profile:v main 
+        // -crf 20 
+        // -g 48 
+        // -keyint_min 48 
+        // -sc_threshold 0 
+        // -b:v 800k 
+        // -hls_time 10 
+        // -hls_playlist_type vod 
+        // -hls_segment_filename output\vv30s_480p_%03d.ts output\vv30s_480p.m3u8
+
+        function createMasterPlaylist() {
+        const masterName = \`\${filename}.m3u8\`;
+        const masterContent = \`#EXTM3U
+        #EXT-X-VERSION:3
+        \${variants
+        .map(
+            (
+            v
+            ) => \`#EXT-X-STREAM-INF:BANDWIDTH=\${v.bandwidth},RESOLUTION=\${v.width}x\${v.height}
+        \${filename}_\${v.name}.m3u8\`
+        )
+        .join("\n")}
+        \`;
+
+        fs.writeFileSync(path.join(outputDir, masterName), masterContent);
+        console.log("Master playlist created.");
+        }
+
+        function run() {
+        if (!fs.existsSync(outputDir)) {
+            fs.mkdirSync(outputDir);
+        }
+
+        let index = 0;
+        function next() {
+            if (index >= variants.length) {
+            createMasterPlaylist();
+            return;
+            }
+            createVariant(variants[index], (err) => {
+            if (err) return;
+            index++;
+            next();
+            });
+        }
+        next();
+        }
+
+        run();
+        `;
+
+      document.getElementById("output2").textContent = str2;
+    </script>
+  </body>
+</html>

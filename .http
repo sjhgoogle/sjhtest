@@ -1,0 +1,74 @@
+###
+GET http://192.168.0.78:9004/v1/users?groupID=0&subInclude=true&offset=0&limit=10
+Cookie: ucsinfo=0d5f2ec5-e41b-428f-5c08-eadf71bf68a7; extinfo=9d51b4e236ec593131500a12691fa26a
+
+### 페이징
+POST http://localhost:19000/paging HTTP/1.1
+Content-Type: application/json
+
+{
+    "pageNo" : 399,
+    "dataPerPage" : 2,
+    "count": 199,
+    "content": {
+        "title" :"t1",
+        "name" :"sjh"
+    }
+}
+
+
+### acctoekn
+POST http://localhost:19000/jwt/accToken HTTP/1.1
+Content-Type: application/json
+
+{
+    "ttl": "1s",
+    "hello": "zz weegzz weegzzz weeg",
+    "wow": "kingking"
+}
+
+### 리프레시
+POST http://localhost:19000/jwt/refreshToken HTTP/1.1
+Content-Type: application/json
+
+{
+    "accToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0dGwiOiIxcyIsImhlbGxvIjoienogd2VlZ3p6IHdlZWd6enogd2VlZyIsIndvdyI6ImtpbmdraW5nIiwiaWF0IjoxNzExMjkyMTg4LCJleHAiOjE3MTEyOTIxODksImlzcyI6Imlzc3VlciJ9.SmLXf4tl32rb7rc2w-OjuAEzwA7Yr6AFqNXqfvWBg_g"
+    // exp 넘어가도 재발급해줄까하는 플래그
+    ,"ignoreExp": false
+}
+
+
+### 토큰검증
+GET http://localhost:19000/jwt/dataNeedToken HTTP/1.1
+Content-Type: application/json
+X-AUTH-TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0dGwiOiIxcyIsImhlbGxvIjoienogd2VlZ3p6IHdlZWd6enogd2VlZyIsIndvdyI6ImtpbmdraW5nIiwiaWF0IjoxNzExMjkyMTU4LCJleHAiOjE3MTEyOTIxNTksImlzcyI6Imlzc3VlciJ9.60Wow26SUBe_uwSW8xWYpIr9Vq0hTYi5YUcVhfFj9wU
+
+{
+}
+
+
+###
+
+POST http://tb.app.membership.kt.com/membershipv3/login HTTP/1.1
+Content-Type: application/json
+appVersion: 24.01.02
+deviceId: 6NIaxctK5eHrlsfi27ecUbbF%2bk9WwG%2bdyOKQITnD%2bCQ%2f6ni4wzqNbX0y278QxZed
+os: ios
+osVersion: 16.1
+rsaYn: N
+SGNTR: GOOGLE
+storeInfo: GOOGLE
+
+{
+"password": "new!1234",
+"deviceId": "6NIaxctK5eHrlsfi27ecUbbF%2bk9WwG%2bdyOKQITnD%2bCQ%2f6ni4wzqNbX0y278QxZed",
+"ollehId": "ktmtbtest05",
+"advertId": "95A5F138-AC85-446F-A62C-9FC040C31351",
+"pushToken": "fDoGqR5JkkySuvJeQi1WC8:APA91bHbZQo__KxAsSq4zetmYaksqX59-_Jv0cup7DTsXNbNs3a0ZqZkxhQjeCHUk_Uv1oUpb1KtVUlB6xdkw1l1cOQO0lUiJgAIbhIg3AqFTGxq7x_uT6jxxbposdv6uN2P-MEPvDT-"
+}
+
+POST http://localhost:19000/kcp/kcpcertRidirect?dummy=Y HTTP/1.1
+Content-Type: application/x-www-form-urlencoded 
+
+a=1123123
+&b=3

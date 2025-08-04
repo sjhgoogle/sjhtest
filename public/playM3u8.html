@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>RTSP Streaming Example</title>
+    <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet" />
+    <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"
+      integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g=="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <h1>m3u8 video-js로 플레이하기</h1>
+    <p>
+      video 태그에 data-setup='{"techOrder": ["hls", "html5"]}' 가 있으면 비디오플레이, 볼륨등 js액션이 추가되고
+      class="video-js"가 디자인해줌
+    </p>
+
+    <input id="url-input" type="text" value="http://210.99.70.120:1935/live/cctv001.stream/playlist.m3u8" />
+    <button onclick="playLink()">비디오재생</button>
+    <video
+      id="my-video"
+      data-setup='{"techOrder": ["hls", "html5"]}'
+      class="video-js"
+      controls
+      width="800"
+      height="500"
+    >
+      <source
+        id="my-video-src"
+        src="http://210.99.70.120:1935/live/cctv002.stream/playlist.m3u8"
+        type="application/x-mpegURL"
+      />
+    </video>
+
+    <pre>
+      http://210.99.70.120:1935/live/cctv001.stream/playlist.m3u8
+      http://210.99.70.120:1935/live/cctv002.stream/playlist.m3u8	
+    </pre>
+
+    <script>
+      function playLink() {
+        var url = document.getElementById("url-input").value;
+        var myVideoSrc = document.getElementById("my-video-src");
+        myVideoSrc.setAttribute("src", url);
+
+        var myVideo = $("#my-video video").get(0);
+        myVideo.pause();
+        videojs(myVideo).dispose();
+
+        $(`
+        <video 
+            id="my-video"
+            data-setup='{"techOrder": ["hls", "html5"]}' class="video-js" controls width="800" height="500">
+              <source  id="my-video-src" src=${url} type="application/x-mpegURL" />
+            </video>
+        `).appendTo("body");
+
+        // videojs("my-video")
+        videojs("my-video", { techOrder: ["hls", "html5"] });
+      }
+    </script>
+  </body>
+</html>

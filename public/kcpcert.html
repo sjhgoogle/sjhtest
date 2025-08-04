@@ -1,0 +1,324 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="container">
+      <h3>kcp 모듈인증해보기 - winwin은 "SM139" 결제후 사용중</h3>
+      <pre>
+        1. 서버에서 kcp 모듈을 통해서 난수값하나를 만든다(현재시간 + 라이선스키등 섞어서 ex SM13924030921215966000000 -> 1E9C36E3E7BE5C3066B27B8F28C7D653AB5D927B)
+        2. 프론트에서 from-submit으로 1에서 받은 난수값 + redirectUrl + 설정값 등으로 kcp 화면으로 점프
+        3. 2에서 설정한 redirectUrl로 post데이터가 날아오는데 실제데이터는 enc_cert_data 라는 긴 암호문이다
+        4. 3의 enc_cert_data를 kcp모듈로 다시 복호화하면 유저이름, ci등이 나온다
+      </pre>
+      <hr />
+      <hr />
+
+      <div class="mb-5">
+        <button type="button" class="btn btn-primary" onclick="kcpcertMakeHash()">
+          ordr_idxx 해시암호화값 한번 받아보기
+        </button>
+        <button type="button" class="btn btn-primary" onclick="kcpcertRidirect()">
+          redirectUrl로 오는 값(enc_cert_data) 복호화 더미로 해보기
+        </button>
+      </div>
+      <!-- <button type="button" class="btn btn-primary">
+        더미 데이터로
+
+        
+      </button> -->
+
+      <!-- <form class="sb1" action="/kcp/kcpcertTest" method="POST">
+        <h5>/kcpcertTest 서버에 준비된 더미데이터들 복호화 해보기</h5>
+        <pre>
+        lf_CT_CLI__decrypt_enc_cert 활용해서 복호화함
+
+      </pre
+        >
+        <button type="submit">gogo kcpcertTest</button>
+      </form> -->
+      <!-- // user_name: 
+      // ordr_idxx: 23011821044577
+      // req_tx: cert
+      // cert_type: 01
+      // web_siteid: 
+      // site_cd: SM139
+      // Ret_URL: https://winwin.ksia.or.kr/plugin/kcpcert/kcpcert_result.php
+      // cert_otp_use: Y
+      // cert_enc_use: Y
+      // cert_able_yn: 
+      // res_cd: 
+      // res_msg: 
+      // up_hash: CD5CCB68EFE15CE79EB92A1DE1DBC08C972E9D0E
+      // veri_up_hash: 
+      // param_opt_1:opt1
+      // param_opt_2: opt2
+      // param_opt_3: opt3 -->
+
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-text">action: https://cert.kcp.co.kr/kcp_cert/cert_view.jsp</h5>
+          <h5 class="card-title">필요한 폼 데이터들</h5>
+
+          <form id="kcp-form" action="https://cert.kcp.co.kr/kcp_cert/cert_view.jsp" method="POST" class="form-check">
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">user_name</label>
+              <div class="col-sm-10"><input type="text" name="user_name" class="form-control" value="" /></div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">ordr_idxx</label>
+              <div class="col-sm-10">
+                <input type="text" name="ordr_idxx" class="form-control" value="23011821044577" />
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">req_tx</label>
+              <div class="col-sm-10"><input type="text" name="req_tx" class="form-control" value="cert" /></div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">cert_type</label>
+              <div class="col-sm-10"><input type="text" name="cert_type" class="form-control" value="01" /></div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">web_siteid</label>
+              <div class="col-sm-10"><input type="text" name="web_siteid" class="form-control" value="" /></div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">site_cd</label>
+              <div class="col-sm-10"><input type="text" name="site_cd" class="form-control" value="SM139" /></div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">Ret_URL</label>
+              <div class="col-sm-10">
+                <input
+                  type="text"
+                  name="Ret_URL"
+                  class="form-control"
+                  value="http://sjhtest.musicen.com/kcpcertRidirect"
+                />
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">https</label>
+              <div class="col-sm-10"><input type="text" name="https" class="form-control" value="" /></div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">cert_otp_use</label>
+              <div class="col-sm-10"><input type="text" name="cert_otp_use" class="form-control" value="Y" /></div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">cert_enc_use</label>
+              <div class="col-sm-10"><input type="text" name="cert_enc_use" class="form-control" value="Y" /></div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">cert_able_yn</label>
+              <div class="col-sm-10"><input type="text" name="cert_able_yn" class="form-control" value="" /></div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">res_cd</label>
+              <div class="col-sm-10"><input type="text" name="res_cd" class="form-control" value="" /></div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">res_msg</label>
+              <div class="col-sm-10"><input type="text" name="res_msg" class="form-control" value="" /></div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">up_hash</label>
+              <div class="col-sm-10"><input type="text" name="up_hash" class="form-control" value="" /></div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">veri_up_hash</label>
+              <div class="col-sm-10"><input type="text" name="veri_up_hash" class="form-control" value="" /></div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">param_opt_1</label>
+              <div class="col-sm-10"><input type="text" name="param_opt_1" class="form-control" value="opt1" /></div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">param_opt_2</label>
+              <div class="col-sm-10"><input type="text" name="param_opt_2" class="form-control" value="opt2" /></div>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-2 col-form-label">param_opt_3</label>
+              <div class="col-sm-10"><input type="text" name="param_opt_3" class="form-control" value="opt3" /></div>
+            </div>
+            <button onclick="submitKcp()" type="button" class="btn btn-primary">
+              submit으로 kcp 인증하러가기 - 반드시 POST방식으로 화면이 전환되어야해서 form-submit사용
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <pre>
+          1. 해싱시드 만드는 규칙 
+          const ordr_idxx = dayjs().format("YYMMDDHHmmss") + dayjs().millisecond().toString().padStart(2, "0").slice(0, 2); // YYMMDDHHMMSSmm 밀리세컨까지 14자리
+          const year = "00";
+          const month = "00";
+          const day = "00";
+          const user_name = "";
+          const sex_code = "";
+          const local_code = "";
+          const hash_data = "SM139" + ordr_idxx + user_name + year + month + day + sex_code + local_code;
+          // hash_data = SM13924030800461164000000
+
+          2. 시드로 암호화하기
+          "./ct_cli_exe.exe lf_CT_CLI__make_hash_data SM13924030800461164000000"
+
+          3. 리다이렉트시 POST로 오는 데이터 전문(enc_cert_data가 제일 중요)
+          phone_no: '',
+          res_msg: '%C1%A4%BB%F3%C3%B3%B8%AE',
+          DI: '',
+          year: '0',
+          user_name_url_yn: '',
+          cert_otp_use: 'Y',
+          CI_ENC_YN: 'Y',
+          comm_id: 'LGM',
+          sex_code: '',
+          safe_guard_yn: 'N',
+          PRE_USE_YN: 'N',
+          van_tx_id: '24030808013115515',
+          tx_type: '2600',
+          day: '0',
+          site_key: '',
+          enc_cert_data: 'C570BA479DC9F3D25379968C270AEE27760B2E82AC3A70AA76E5EFF4CD8957DC931209AC0052EE2CE872A2D22D7E884A325B2680E6BCE56094ED551DFD5AD0606691CAB8558E99E6D8AB262264F3E24E728BFCC7559A64FE1D6170EBF73B2B5C027D969B92AB42495AA8A6E9215178C17124F5796A644F115F31C74D63FDD4D3F1E8FB647153EA0F882069B07C88223BBB78A3D17A29D4EB9D846A2904D86E467BED24D11773A4CF9B92453D4E12561CA31DB0C6978304EDE17B35B214E6B99F8BADDD543EE1E4AE9BAC84A24728ADAA65CEA354810CD25495E81D22041383D32851ECFF1C98C9F2915C8A6440F03D9E7A89317E65C3C7D0AB4AC872EE700B6020A0DAA301BF4E059C8048E07DFA5E31892E3629D9666BC83EA073B461F961C1A773A815EB7B01C8D3BEF84153A43CCD62C4BB019E80F370DF4A895B3D57182F528700BF3741BDF77F1CE4EBAF07D75065411035872C269D930CEF38AFFADBA52879EE0AD3BABD54F810863391B7870286264A97EB5BCC240D41B234CAD3A688833D4FE2A5B4F8768A4C98F6B73B2F3698333D779A380FE1F720CBEC73520FFD652C9CE94D60787FA43BA0E2813F70983FDAB013A57796234B8EFF0888E7F825F5DE2D5C7C07805E899D89D3B175DCFE8BF54FD3153EB42EFF937651BF878EC59A1AE4801DED2095C91CBFEF029BABB2',
+          web_siteid_hashYN: '',
+          dn_hash: 'undefined',
+          res_cd: '0000',
+          DI_URL: '',
+          month: '0',
+          Ret_URL: 'http://localhost:19000/kcp/kcpcertRidirect',
+          van_sms_yn: '',
+          auth_tx_id: '',
+          kcp_merchant_time: '',
+          info_code: '',
+          user_name: '%BC%DB%C1%BE%C7%F6',
+          cert_02_yn: 'Y',
+          log_trace_no: 'SM139RS8EOLraYg5',
+          param_opt_1: 'opt1',
+          Ret_Noti: '',
+          param_opt_3: 'opt3',
+          param_opt_2: 'opt2',
+          cert_enc_use: 'Y',
+          Logo_URL: '',
+          cert_enc_use_ext: 'N',
+          cert_no: '24698104196811',
+          CI: '',
+          session_id: '',
+          local_code: '',
+          web_siteid: '',
+          cert_01_yn: 'Y',
+          birth_day: '',
+          up_hash: '',
+          site_cd: 'SM139',
+          CI_URL: '',
+          per_cert_no: '24698104196811',
+          ordr_idxx: '1AA7A22CCC3C66D9EF7E82886CCBF7FB4CEF8A3F',
+          cert_method: '',
+          req_tx: 'otp_auth'
+
+          4. enc_cert_data 복호화
+          ./ct_cli_exe.exe 
+          lf_CT_CLI__decrypt_enc_cert 
+          SM139 
+          23648019074310 
+          FA0DABF6C7EC5D5917600036E469634B98E796BD5231AE76D98F2B651D96842A3EF76DE78B92FCC663AAEDF49F8EFC3CF33C86E23B30650F7F4CF67D16518CB906CF8767D9E65C13FE929BC72832591E74F1B41D13E028BABA3EC1208F7361FD6940298586E229E38B370DE74FAEC7466D493155DC4FC4DA7FF94431E6763E0EE87C60853AC5A11BBD2326F9AFA4D3E462D2E001F02154BE56BC4933C8FF66423CF34D5CE51A01F1A64758338C397CF1E3A990C0C5D966B20DE29CFD39BE9CD99FD97F9F8F3D10A1D0DE8BBC9318597EAA1AC13C6BF50E7F20FC9C9B6F1B43C278E4C7D7AD11C0BE16D91C72F373D31D3F556EBD529944DB1AEA8E44D84BB6A3C3ED53A6F293E1D149A54E4B967BBB49B8E5B64514EBFB22765CCD904B6993F29C7256CAB159A74D7D7817C868AD774BC52B6D8F9E20EC0D8ADC73F05AF58FF642E5A70AA6714550D74C9E683A468D5CE010BC945A770DCBFBC55039B968A1C614D3EF552FDB82BB52F95D34051F53995FC4A713CFE7676ED165766A256E952112638D6CB6A5238E41B7A530E375BFE94FF01F2E76254662FA320502481F63EFEB3D7D88D5A1731B112850287413768C91BFD7FF63E998C3E1AEFDA01B69F9A426220EE17D3571FAEFB2B55E54CF879D7577B5B71FC1035CC4548DD9BD5C97ACAF15E3F282FDF27EF39904C0B814C5C3
+
+          5. 4의 복호화 결과물은 a=1b=2 이런식으로 되어있는데 a=1{code32}b=2 처럼 아무것도없어 보이는데 
+          저사이마다에 String.fromCharCode(31) 코드가 숨어있다 그래서 그걸로 split 하면 아래처럼 나온다
+
+          * web_siteid_hashYN=web_site
+          * id=phone
+          * _no=01026444093
+          * user_name=송종현
+          * birth_day=19940624
+          * sex_code=01
+          * local_code=01c      
+          * 
+          * comm_id=LGM
+          * ci=jbBFLWoQdblJDiknoZ73owj2+WLhwDDt8De1fEzArSzPuzmP38Yn053bOttITyks0iVuMb6/hixxkUpvEmVbdQ==
+          * di=MC0GCCqGS SIb3DQIJAyEA2RNHwrh6P2woPRKSS6qqD1LDuLCQ0XMMVYETN4KJhi0=
+          * ci_url=jbBFLWoQdblJDiknoZ73owj2%2BWLhwDDt8De1fEzArSzPuzmP388Yn053bOttITyks0iVuMb6%2FhixxkUpvEmVbdQ%3D%3D
+          * di_url=MC0GCCqGSIb3DQIJAyEA2RNHwrh6P2woPRKSS6qqD1LDuLCQ0XMMVYETN4KJhi00%3D
+          * res_cd=0000
+          * res_msg=정상처리
+      </pre>
+
+      <pre>
+        11. DI(Duplication Information)란 무엇인가? -- 64byte(영대소문자+특수+숫자)
+        중복가입체크 같은걸 방지하기 위한 정보임. 예를 들어 구글에 가입할 경우 구글 번호라는 것을 준다고 생각하면
+        내가 구글에서 여러개 아이디를 만들었을 때 각자 계정 ID가 달라도 식별 번호는 같음
+        * 일반적으로 DI = CI + 사이트고유코드  (해싱함)
+        (MC0GCCqGSIb3DQIJAyEAJbEy2Nn4jyP/03Ih0hM/tNLSCKfwJIi/2p/tWU3WcVM=) 64byte(64글자)이다
+
+        12. CI(Connecting information)란 무엇인가? -- 88byte(영대소문자+특수+숫자)
+        서비스를 연계하여 서로 다른 인터넷 서비스 간에도 동일한 사용자인지 구분을 가능하게 해주는 정보임.
+        인터넷 공간 어디서나 주민번호로 나를 식별 가능하게 해줌
+
+        -> 공식으로 지정된 본인확인 인증기관(주민번호 관리-나이스, KCB 등)에 인증을 받고 각 사이트는 CI와 DI값을 받음, 공인인증서나 휴대폰인증은 CI와 DI값을 얻기 위한 매개체 수단임. CI 자체가 아니란 말임
+
+        * 일반적으로 CI = 주민번호 + @ (해싱함)
+
+        (wEi9oYSuekQGxT9MV4rKHG4CO+Zrp+onhLIIuembI8jx/0PLF5Ne3oMBxvUFlN4UmsgjeNErZfmpCVUFHsv8nq==) 88byte(88글자)
+      </pre>
+    </div>
+
+    <script>
+      $(function () {
+        const kcpcertRidirect = location.origin + "/kcp/kcpcertRidirect";
+        $('[name="Ret_URL"]').val(kcpcertRidirect);
+      });
+
+      async function submitKcp() {
+        const res = await fetch("/kcp/kcpcertMakeHash").then((r) => r.json());
+        const hash = res.result;
+        console.log("🚀 ~ hash", hash);
+        $('[name="ordr_idxx"]').val(hash);
+        $("#kcp-form").submit();
+      }
+      function kcpcertMakeHash() {
+        fetch("/kcp/kcpcertMakeHash")
+          .then((r) => {
+            if (!r.ok) {
+              return r.text().then((t) => {
+                throw new Error(t);
+              });
+            }
+            
+            return r.json();
+          })
+          .then((res) => {
+            console.log(res);
+            alert(res.result);
+          })
+          .catch((e) => {
+            console.error(e);
+            const msg = e.message || "알수없는 오류";
+            alert(msg);
+          })
+          ;
+      }
+      function kcpcertRidirect() {
+        fetch("/kcp/kcpcertRidirect?dummy=Y", { method: "POST" })
+          .then((r) => r.json())
+          .then((res) => {
+            console.log(res);
+            alert(res.decodeKcpRedirectData.phone_no);
+          });
+      }
+    </script>
+  </body>
+</html>
