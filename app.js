@@ -364,14 +364,20 @@ const iohttp = socketioServer(resultServer, {
 iohttp.on("connection", (clientSocket) => {
   clientSocket.emit("WER");
   clientSocket.on("chatClear", (_) => {
-    chatLi = [];
+    chatMessage.clearAllChatLi();
+  });
+  clientSocket.on("removeChatLi", (num) => {
+    chatMessage.removeChatLi(num);
+    clientSocket.emit("all-chat", chatMessage.getAllChatLi());
   });
 
   clientSocket.on("chat", (chatMsg) => {
-    chatLi.push(chatMsg);
+    // chatLi.push(chatMsg);
+    chatMessage.pushChatLi(chatMsg);
     iohttp.emit("chat", chatMsg);
   });
-  clientSocket.emit("all-chat", chatLi);
+  // clientSocket.emit("all-chat", chatLi);
+  clientSocket.emit("all-chat", chatMessage.getAllChatLi());
 });
 
 /**
@@ -446,7 +452,52 @@ const RTSP_PORT = 19002;
 const tmpExx = express();
 const tmpS = http.createServer(tmpExx);
 
-let chatLi = [];
+// let chatLi = [];
+
+class ChatMessage {
+  chatLi = [];
+
+  constructor() {
+    // load from file chatLi.txt if exists
+    const filePath = path.join(__dirname, "chatLi.txt");
+    if (!fs.existsSync(filePath)) {
+      fs.writeFileSync(filePath, JSON.stringify([]));
+    }
+
+    const data = fs.readFileSync(filePath, "utf8");
+    try {
+      this.chatLi = JSON.parse(data);
+    } catch (e) {
+      this.chatLi = [];
+    }
+  }
+
+  getAllChatLi() {
+    return this.chatLi;
+  }
+  clearAllChatLi() {
+    this.chatLi = [];
+    // save to file chatLi.txt
+    const filePath = path.join(__dirname, "chatLi.txt");
+    fs.writeFileSync(filePath, JSON.stringify(this.chatLi));
+  }
+  pushChatLi(msg) {
+    this.chatLi.push(msg);
+    // save to file chatLi.txt
+    const filePath = path.join(__dirname, "chatLi.txt");
+    fs.writeFileSync(filePath, JSON.stringify(this.chatLi));
+  }
+  removeChatLi(_num) {
+    const num = _num - 1;
+    this.chatLi.splice(num, 1);
+    // save to file chatLi.txt
+    const filePath = path.join(__dirname, "chatLi.txt");
+    fs.writeFileSync(filePath, JSON.stringify(this.chatLi));
+  }
+}
+
+const chatMessage = new ChatMessage();
+
 tmpS.listen(RTSP_PORT, () => {
   console.log("ws 이용한 rtsp송출서버 PORT ->" + `ws://localhost:${RTSP_PORT}`);
 });

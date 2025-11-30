@@ -73,8 +73,16 @@
         >
           <template id="chat-div-li">
             <!-- <li class="border border-dark lisn mb-3 list-unstyled"><pre>hello gogo</pre></li> -->
-            <li class="btn btn-info w-100 mb-3 border border-dark">
+            <li
+              class="btn btn-info w-100 mb-3 border border-dark position-relative"
+            >
               <pre>hello gogo</pre>
+              <button
+                style="height: 100%"
+                class="position-absolute top-0 end-0"
+              >
+                remov
+              </button>
             </li>
           </template>
         </div>
@@ -85,7 +93,7 @@
             type="text"
             id="chatMsg"
             class="w-100"
-            style="display: inline; min-height: 50px"
+            style="display: inline; min-height: 100px"
           ></textarea>
           <button class="btn btn-primary" onclick="chatMsg()">
             chat-click
@@ -464,17 +472,23 @@
         function chatMsg() {
           const chatMsg = $("#chatMsg").val();
           socketio.emit("chat", chatMsg);
+          $("#chatMsg").val("");
         }
         function chatMsgEnter(event) {
-          if (event.keyCode === 13) {
+          console.log("🚀 ~ chatMsgEnter ~ event:", event);
+          if (!event.shiftKey && event.keyCode === 13) {
             // Call the function you want to execute
             chatMsg();
+            event.preventDefault();
           }
         }
         function chatClear() {
           $("#chat-div").html(null);
 
           socketio.emit("chatClear", "");
+        }
+        function removeChatLi(num) {
+          socketio.emit("removeChatLi", num);
         }
 
         $(async function () {
@@ -493,28 +507,44 @@
             textarea.select();
             document.execCommand("copy");
             document.body.removeChild(textarea);
+
+            openToast("클립보드에 복사되었습니다.");
           });
+          $(document).on("click", "#chat-div button", function (e) {
+            e.stopPropagation();
+            const num = Number(e.target.innerText.split(":")[1]);
+
+            removeChatLi(num);
+          });
+
           socketio.on("chat", async (chatMsg) => {
             console.log(chatMsg);
             const li = $($("#chat-div-li").clone().html());
             li.find("pre").text(chatMsg);
+            li.find("button").text("cnt : " + ($("#chat-div li").length + 1));
 
             $("#chat-div").append(li);
             $("#chat-div").scrollTop($("#chat-div").prop("scrollHeight"));
           });
 
           socketio.on("all-chat", async (chatMsgs) => {
-            const chatLis = chatMsgs.map((chat) => {
-              const li = $($("#chat-div-li").clone().html());
-              li.find("pre").text(chat);
+            $("#chat-div li").remove();
 
-              return li;
-            });
-            console.log("🚀 ~ $.each ~ chatLis:", chatLis);
+            // template에서 content 가져오기
+            const template = document.querySelector("#chat-div-li");
 
-            $.each(chatLis, function (idx, chat) {
-              $("#chat-div").append(chat);
+            // chatMsgs 배열로 DOM 생성
+            let $elems = $(); // 빈 jQuery 객체
+            chatMsgs.forEach((chat, idx) => {
+              // content 복제
+              const $clone = $(template.content.cloneNode(true)); // cloneNode(true)로 깊은 복제
+              $clone.find("pre").text(chat); // <pre> 내용 교체
+              $clone.find("button").text("cnt : " + (idx + 1)); // <pre> 내용 교체
+              $elems = $elems.add($clone); // jQuery 객체에 추가
             });
+
+            // 한 번에 append
+            $("#chat-div").append($elems);
 
             $("#chat-div").scrollTop($("#chat-div").prop("scrollHeight"));
           });
@@ -702,6 +732,43 @@
               );
             },
           });
+        }
+      </script>
+    </div>
+
+    <!-- Toast Container -->
+    <div
+      class="toast-container position-fixed top-0 end-0 p-3"
+      id="toastContainer"
+    >
+      <script>
+        const toastContainer = document.getElementById("toastContainer");
+        // const showToastBtn = document.getElementById("showToastBtn");
+
+        function openToast(message, type = "info") {
+          // 새로운 toast element 생성
+          const toastEl = document.createElement("div");
+          toastEl.className =
+            "toast align-items-center text-bg-primary border-0";
+          toastEl.setAttribute("role", "alert");
+          toastEl.setAttribute("aria-live", "assertive");
+          toastEl.setAttribute("aria-atomic", "true");
+
+          toastEl.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">
+        ${message}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  `;
+
+          // toastContainer에 append
+          toastContainer.appendChild(toastEl);
+
+          // Bootstrap Toast 초기화 후 show
+          const toast = new bootstrap.Toast(toastEl, { delay: 1000 });
+          toast.show();
         }
       </script>
     </div>
