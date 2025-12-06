@@ -4,6 +4,21 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Bootstrap 5 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <div
+      class="toast-container position-fixed bottom-0 end-0 p-3"
+      id="toastArea"
+    ></div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="/socket.io/socket.io.js"></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"
@@ -22,7 +37,7 @@
         width: 100px;
         height: 100px;
       }
-      
+
       #cameraSelect {
         margin-top: 10px;
         padding: 5px;
@@ -32,7 +47,7 @@
   </head>
   <body>
     <h1>
-      시그널링서버세팅 - 사파리는 안댈수있음
+      시그널링서버세팅! - 사파리는 안댈수있음
       <input
         type="text"
         style="width: 300px"
@@ -54,6 +69,369 @@
       <hr />
       <video id="remoteVideo" autoplay playsinline></video>
     </div>
+
+    <script>
+      const GLOBL_CONFIG = {
+        // iceTransportPolicy: "relay",
+        iceServers: [
+          {
+            urls: "stun:stun.l.google.com:19302", // STUN 서버
+          },
+          {
+            urls: "turn:coturn.petnyang.shop:3478", // TURN 서버
+            username: "your-username",
+            credential: "your-password",
+          },
+          // {
+          //   urls: "turn:turn.cloudflare.com:3478", // TURN 서버
+          //   username: "your-username",
+          //   credential: "your-password",
+          // },
+        ],
+      };
+    </script>
+
+    <script>
+      async function getUser() {
+        const num = await jojo();
+        console.log("🚀 ~ getUser ~ num:", num);
+      }
+      async function jojo(roomNm = "room1") {
+        return new Promise((res) => {
+          socketio.emit("ranNum", roomNm, (userCount) => {
+            res(userCount);
+          });
+        });
+      }
+
+      let localPc;
+      let remoteStream;
+
+      var localVideo = document.querySelector("#localVideo");
+      var remoteVideo = document.querySelector("#remoteVideo");
+
+      localPc = new RTCPeerConnection(
+        GLOBL_CONFIG
+        //   {
+        //   iceServers: GLOBL_CONFIG,
+        //   // iceServers: [
+        //   //   // { urls: "stun:stun.l.google.com:19302" },
+        //   //   // { urls: "stun:stun.services.mozilla.com" },
+        //   //   // { urls: "stun:stun.stunprotocol.org:3478" },
+        //   //   {
+        //   //     urls: "stun:stun.l.google.com:19302", // STUN 서버
+        //   //   },
+        //   //   {
+        //   //     urls: "turn:turn.cloudflare.com:3478", // TURN 서버
+        //   //     username: "your-username",
+        //   //     credential: "your-password",
+        //   //   },
+        //   // ],
+        // }
+      );
+
+      localPc.addEventListener("icecandidate", (event) => {
+        console.log("🚀 ~ localPc.addEventListener ~ event:", event);
+        if (!event.candidate) return;
+        const candidate = event.candidate;
+        const candiObj = candidate;
+        socketio.emit("candi", candiObj);
+      });
+
+      // setReomote(sdp)할때 시행됨
+      localPc.addEventListener("addstream", (event) => {
+        console.log("🚀 ~ socketio.emit ~ addstream:");
+
+        remoteStream = event.stream;
+        remoteVideo.srcObject = remoteStream;
+      });
+      localPc.addEventListener("iceconnectionstatechange", (event) => {
+        console.log("ICE STATE:", localPc.iceConnectionState);
+
+        // 연결 되면 chosen candidate pair 확인
+        if (localPc.iceConnectionState === "connected") {
+          const stats = localPc.getStats();
+          console.log("🚀 ~ stats:", stats);
+
+          stats.then((res) => {
+            // for (const v of res.values()) {
+            //   console.log(v); // ← 여기서 모든 report가 보임
+            // }
+            console.log("🚀 ~ res:", res);
+            res.forEach((report) => {
+              if (report.type === "candidate-pair") {
+                const local = res.get(report.localCandidateId);
+                const remote = res.get(report.remoteCandidateId);
+                console.log("SELECTED PAIR:", { local, remote });
+                console.log(
+                  "SELECTED PAIR:",
+                  local.candidateType,
+                  remote.candidateType
+                );
+
+                showToast(
+                  `local : ${local.candidateType}, remote : ${remote.candidateType}`
+                );
+              }
+            });
+          });
+        }
+      });
+
+      function join() {
+        socketio.emit("join", getRoomNm(), async (userCount) => {
+          console.log("current User is>>", userCount);
+
+          // step1. create Peer connection
+
+          // step2. 일단 로컬peer에 내 스트림박고
+          localPc.addStream(localStream);
+
+          // step3 offer생성
+          const sessionDescription = await localPc.createOffer({
+            offerToReceiveVideo: 1,
+          });
+          console.log(
+            "🚀 ~ socketio.emit ~ sessionDescription:",
+            sessionDescription
+          );
+
+          // local 세팅하는순간 캔디들 난리남..ㄷㄷ
+          localPc.setLocalDescription(sessionDescription);
+
+          // {type: offer, sdp: 'v=0\r\no=- 5353640859396136048 2 IN .....'} sessionDescription.toJSON이라는 메소드의 결과값이 emit으로 넘어가는듯???
+          socketio.emit("sdpOffer", sessionDescription);
+        });
+      }
+
+      var localVideo = document.querySelector("#localVideo");
+      var remoteVideo = document.querySelector("#remoteVideo");
+      var localStream;
+      const getRoomNm = (_) => $("#ip").val();
+      const socketio = io(location.origin);
+
+      socketio.on("sdpAnswer", async (answerSDP) => {
+        console.log("🚀 ~ socketio.on ~ answerSDP:", answerSDP);
+
+        const sdp = new RTCSessionDescription(answerSDP);
+        localPc.setRemoteDescription(sdp);
+      });
+      socketio.on("sdpOffer", async (sessionDescription) => {
+        console.log("gogogo sdf");
+        if (!localPc) return;
+
+        const newSdp = new RTCSessionDescription(sessionDescription);
+
+        // remote 셋할때 그순간 addStream발동!!
+        localPc.addStream(localStream);
+        console.log("RERE reomte ", newSdp);
+        localPc.setRemoteDescription(newSdp);
+
+        const answerSessionDes = await localPc.createAnswer();
+        localPc.setLocalDescription(answerSessionDes);
+        console.log("🚀 ~ socketio.on ~ answerSessionDes:", answerSessionDes);
+
+        socketio.emit("sdpAnswer", answerSessionDes);
+      });
+      socketio.on("candi", (candi) => {
+        console.log("🚀 ~ socketio.on ~ candi:", candi);
+        const newCandi = new RTCIceCandidate(candi);
+        console.log("RERE candi ", newCandi);
+
+        localPc.addIceCandidate(newCandi);
+      });
+
+      // Add camera selection functionality
+      async function setupCameraSelection() {
+        try {
+          // Get the list of available media devices
+          const devices = await navigator.mediaDevices.enumerateDevices();
+
+          // Filter out video input devices (cameras)
+          const videoDevices = devices.filter(
+            (device) => device.kind === "videoinput"
+          );
+
+          // Get the select element
+          const cameraSelect = document.getElementById("cameraSelect");
+
+          // Clear existing options
+          cameraSelect.innerHTML = "";
+
+          // Add options for each video device
+          videoDevices.forEach((device) => {
+            const option = document.createElement("option");
+            option.value = device.deviceId;
+            option.text =
+              device.label || `Camera ${cameraSelect.options.length + 1}`;
+            cameraSelect.appendChild(option);
+          });
+
+          // Set current camera as selected if we have a stream
+          if (localStream) {
+            const currentTrack = localStream.getVideoTracks()[0];
+            if (currentTrack) {
+              const currentDevice = videoDevices.find(
+                (device) => device.label === currentTrack.label
+              );
+              if (currentDevice) {
+                cameraSelect.value = currentDevice.deviceId;
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Error enumerating devices:", err);
+        }
+      }
+
+      // Add event listener to handle camera selection changes
+      document
+        .getElementById("cameraSelect")
+        .addEventListener("change", async () => {
+          const deviceId = document.getElementById("cameraSelect").value;
+
+          try {
+            // Stop current tracks
+            if (localStream) {
+              localStream.getTracks().forEach((track) => track.stop());
+            }
+
+            // Get new stream with selected camera
+            const newStream = await navigator.mediaDevices.getUserMedia({
+              audio: true,
+              video: { deviceId: { exact: deviceId } },
+            });
+
+            // Update local stream and video element
+            localStream = newStream;
+            localVideo.srcObject = localStream;
+
+            // If we're already connected, update the tracks in the peer connection
+            if (localPc && localPc.signalingState !== "closed") {
+              const senders = localPc.getSenders();
+
+              // Replace video track
+              const videoTrack = localStream.getVideoTracks()[0];
+              const videoSender = senders.find(
+                (sender) => sender.track && sender.track.kind === "video"
+              );
+              if (videoSender) {
+                videoSender.replaceTrack(videoTrack);
+              }
+
+              // Replace audio track
+              const audioTrack = localStream.getAudioTracks()[0];
+              const audioSender = senders.find(
+                (sender) => sender.track && sender.track.kind === "audio"
+              );
+              if (audioSender) {
+                audioSender.replaceTrack(audioTrack);
+              }
+            }
+          } catch (err) {
+            console.error("Error getting user media with new device:", err);
+          }
+        });
+
+      async function play() {
+        try {
+          // Request access to media devices
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: true,
+          });
+
+          localStream = stream;
+          localVideo.srcObject = stream;
+
+          // Set up camera selection after we have permission
+          // (this ensures device labels are available)
+          await setupCameraSelection();
+        } catch (err) {
+          console.error("Error getting user media:", err);
+          alert(
+            "Error accessing camera and microphone. Please check permissions."
+          );
+        }
+      }
+
+      function sendSocket(msg) {
+        socketio.emit("message", msg);
+      }
+
+      // Initialize everything
+      play();
+
+      const pcConfig = GLOBL_CONFIG;
+
+      // const pcConfig = {
+      //   iceServers: [
+      //     // {
+      //     //   urls: "stun:stun.l.google.com:19302",
+      //     // },
+      //     {
+      //       urls: "stun:stun.l.google.com:19302", // STUN 서버
+      //     },
+      //     {
+      //       urls: "turn:turn.cloudflare.com:3478", // TURN 서버
+      //       username: "your-username",
+      //       credential: "your-password",
+      //     },
+      //   ],
+      // };
+
+      // Function to refresh camera list if needed
+      function refreshCameras() {
+        setupCameraSelection();
+      }
+
+      // Add this function to detect when a device is added or removed
+      navigator.mediaDevices.addEventListener("devicechange", () => {
+        console.log("Device change detected, refreshing camera list");
+        refreshCameras();
+      });
+
+      /**
+       * showToast("메시지")
+       * 2초 유지, 자동 사라짐, 여러 개 스택됨
+       */
+      function showToast(message) {
+        const area = document.getElementById("toastArea");
+
+        const toastEl = document.createElement("div");
+        toastEl.className =
+          "toast align-items-center text-bg-dark border-0 mb-2";
+        toastEl.setAttribute("role", "alert");
+        toastEl.setAttribute("aria-live", "assertive");
+        toastEl.setAttribute("aria-atomic", "true");
+        toastEl.setAttribute("data-bs-delay", "10000"); // 2초 유지
+
+        toastEl.innerHTML = `
+    <div class="d-flex">
+      <div class="toast-body">${message}</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  `;
+
+        area.appendChild(toastEl);
+
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+      }
+    </script>
+
+    <script>
+      // const turnUrl = "https://computeengineondemand.appspot.com/turn?username=41784574&key=4080218913";
+      // const isTurn = pcConfig.iceServers.find((ice) => ice.urls?.slice(0, 5) === "turn:");
+      // if (!isTurn) {
+      //   fetch(turnUrl)
+      //     .then((r) => r.json())
+      //     .then((result) => {
+      //       debugger;
+      //       pcConfig.iceServers.push({});
+      //     });
+      // }
+    </script>
 
     <pre>
       var cand = temp2.candidate
@@ -450,249 +828,5 @@
       a=ssrc:1128538805 cname:2bys63oNJtcMXisq
 
     </pre>
-    <script>
-      async function getUser() {
-        const num = await jojo();
-        console.log("🚀 ~ getUser ~ num:", num);
-      }
-      async function jojo(roomNm = "room1") {
-        return new Promise((res) => {
-          socketio.emit("ranNum", roomNm, (userCount) => {
-            res(userCount);
-          });
-        });
-      }
-
-      let localPc;
-      let remoteStream;
-
-      var localVideo = document.querySelector("#localVideo");
-      var remoteVideo = document.querySelector("#remoteVideo");
-
-      localPc = new RTCPeerConnection({
-        iceServers: [
-          { urls: "stun:stun.l.google.com:19302" },
-          { urls: "stun:stun.services.mozilla.com" },
-          { urls: "stun:stun.stunprotocol.org:3478" },
-        ],
-      });
-
-      localPc.addEventListener("icecandidate", (event) => {
-        console.log("🚀 ~ localPc.addEventListener ~ event:", event);
-        if (!event.candidate) return;
-        const candidate = event.candidate;
-        const candiObj = candidate;
-        socketio.emit("candi", candiObj);
-      });
-
-      // setReomote(sdp)할때 시행됨
-      localPc.addEventListener("addstream", (event) => {
-        console.log("🚀 ~ socketio.emit ~ addstream:");
-
-        remoteStream = event.stream;
-        remoteVideo.srcObject = remoteStream;
-      });
-
-function join() {
-        socketio.emit("join", getRoomNm(), async (userCount) => {
-          console.log("current User is>>", userCount);
-
-          // step1. create Peer connection
-
-          // step2. 일단 로컬peer에 내 스트림박고
-          localPc.addStream(localStream);
-
-          // step3 offer생성
-          const sessionDescription = await localPc.createOffer({ offerToReceiveVideo: 1 });
-          console.log("🚀 ~ socketio.emit ~ sessionDescription:", sessionDescription);
-
-          // local 세팅하는순간 캔디들 난리남..ㄷㄷ
-          localPc.setLocalDescription(sessionDescription);
-
-          // {type: offer, sdp: 'v=0\r\no=- 5353640859396136048 2 IN .....'} sessionDescription.toJSON이라는 메소드의 결과값이 emit으로 넘어가는듯???
-          socketio.emit("sdpOffer", sessionDescription);
-        });
-      }
-
-      var localVideo = document.querySelector("#localVideo");
-      var remoteVideo = document.querySelector("#remoteVideo");
-      var localStream;
-      const getRoomNm = (_) => $("#ip").val();
-      const socketio = io(location.origin);
-
-      socketio.on("sdpAnswer", async (answerSDP) => {
-        console.log("🚀 ~ socketio.on ~ answerSDP:", answerSDP);
-
-        const sdp = new RTCSessionDescription(answerSDP);
-        localPc.setRemoteDescription(sdp);
-      });
-      socketio.on("sdpOffer", async (sessionDescription) => {
-        console.log("gogogo sdf");
-        if (!localPc) return;
-
-        const newSdp = new RTCSessionDescription(sessionDescription);
-
-        // remote 셋할때 그순간 addStream발동!!
-        localPc.addStream(localStream);
-        console.log("RERE reomte ", newSdp);
-        localPc.setRemoteDescription(newSdp);
-
-        const answerSessionDes = await localPc.createAnswer();
-        localPc.setLocalDescription(answerSessionDes);
-        console.log("🚀 ~ socketio.on ~ answerSessionDes:", answerSessionDes);
-
-        socketio.emit("sdpAnswer", answerSessionDes);
-      });
-      socketio.on("candi", (candi) => {
-        console.log("🚀 ~ socketio.on ~ candi:", candi);
-        const newCandi = new RTCIceCandidate(candi);
-        console.log("RERE candi ", newCandi);
-
-        localPc.addIceCandidate(newCandi);
-      });
-
-      // Add camera selection functionality
-      async function setupCameraSelection() {
-        try {
-          // Get the list of available media devices
-          const devices = await navigator.mediaDevices.enumerateDevices();
-          
-          // Filter out video input devices (cameras)
-          const videoDevices = devices.filter(device => device.kind === 'videoinput');
-          
-          // Get the select element
-          const cameraSelect = document.getElementById('cameraSelect');
-          
-          // Clear existing options
-          cameraSelect.innerHTML = '';
-          
-          // Add options for each video device
-          videoDevices.forEach(device => {
-            const option = document.createElement('option');
-            option.value = device.deviceId;
-            option.text = device.label || `Camera ${cameraSelect.options.length + 1}`;
-            cameraSelect.appendChild(option);
-          });
-          
-          // Set current camera as selected if we have a stream
-          if (localStream) {
-            const currentTrack = localStream.getVideoTracks()[0];
-            if (currentTrack) {
-              const currentDevice = videoDevices.find(device => 
-                device.label === currentTrack.label);
-              if (currentDevice) {
-                cameraSelect.value = currentDevice.deviceId;
-              }
-            }
-          }
-        } catch (err) {
-          console.error('Error enumerating devices:', err);
-        }
-      }
-
-      // Add event listener to handle camera selection changes
-      document.getElementById('cameraSelect').addEventListener('change', async () => {
-        const deviceId = document.getElementById('cameraSelect').value;
-        
-        try {
-          // Stop current tracks
-          if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-          }
-          
-          // Get new stream with selected camera
-          const newStream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
-            video: { deviceId: { exact: deviceId } }
-          });
-          
-          // Update local stream and video element
-          localStream = newStream;
-          localVideo.srcObject = localStream;
-          
-          // If we're already connected, update the tracks in the peer connection
-          if (localPc && localPc.signalingState !== 'closed') {
-            const senders = localPc.getSenders();
-            
-            // Replace video track
-            const videoTrack = localStream.getVideoTracks()[0];
-            const videoSender = senders.find(sender => 
-              sender.track && sender.track.kind === 'video');
-            if (videoSender) {
-              videoSender.replaceTrack(videoTrack);
-            }
-            
-            // Replace audio track
-            const audioTrack = localStream.getAudioTracks()[0];
-            const audioSender = senders.find(sender => 
-              sender.track && sender.track.kind === 'audio');
-            if (audioSender) {
-              audioSender.replaceTrack(audioTrack);
-            }
-          }
-        } catch (err) {
-          console.error('Error getting user media with new device:', err);
-        }
-      });
-
-      async function play() {
-        try {
-          // Request access to media devices
-          const stream = await navigator.mediaDevices.getUserMedia({ 
-            audio: true, 
-            video: true 
-          });
-          
-          localStream = stream;
-          localVideo.srcObject = stream;
-          
-          // Set up camera selection after we have permission
-          // (this ensures device labels are available)
-          await setupCameraSelection();
-        } catch (err) {
-          console.error('Error getting user media:', err);
-          alert('Error accessing camera and microphone. Please check permissions.');
-        }
-      }
-
-      function sendSocket(msg) {
-        socketio.emit("message", msg);
-      }
-      
-      // Initialize everything
-      play();
-
-      var pcConfig = {
-        iceServers: [
-          {
-            urls: "stun:stun.l.google.com:19302",
-          },
-        ],
-      };
-
-      // Function to refresh camera list if needed
-      function refreshCameras() {
-        setupCameraSelection();
-      }
-
-      // Add this function to detect when a device is added or removed
-      navigator.mediaDevices.addEventListener('devicechange', () => {
-        console.log('Device change detected, refreshing camera list');
-        refreshCameras();
-      });
-    </script>
-
-    <script>
-      // const turnUrl = "https://computeengineondemand.appspot.com/turn?username=41784574&key=4080218913";
-      // const isTurn = pcConfig.iceServers.find((ice) => ice.urls?.slice(0, 5) === "turn:");
-      // if (!isTurn) {
-      //   fetch(turnUrl)
-      //     .then((r) => r.json())
-      //     .then((result) => {
-      //       debugger;
-      //       pcConfig.iceServers.push({});
-      //     });
-      // }
-    </script>
   </body>
 </html>

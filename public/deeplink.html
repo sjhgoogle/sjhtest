@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
+
+    <!-- <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    /> -->
+    <style>
+      textarea {
+        width: 100%;
+        height: 50vh;
+      }
+      p {
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>딥링크세팅</h1>
+
+    <textarea name="" id=""></textarea>
+    <div>
+      <button onclick="saveCurr()">save curr</button>
+    </div>
+    <div>
+      <div id="buttons"></div>
+      <p id="status">ss</p>
+      <p style="word-break: break-all" id="fullUrl">ioewfjweoiewfjoi</p>
+    </div>
+
+    <script>
+      const URL = "https://werwer.com";
+
+      const DEF_DATA = {
+        screenId: "weoirOEWEFO0123",
+        query: {
+          a: 123,
+          b: "werwe",
+        },
+
+        t1: "111",
+        t2: "111",
+      };
+      let dataObj = {};
+
+      function deppData() {
+        const dataLi = localStorage.getItem("deeplinkDataLi");
+        //if lengh0 then return default data
+
+        if (!dataLi) {
+          localStorage.setItem("deeplinkDataLi", JSON.stringify([]));
+        }
+        const dataLi2 = JSON.parse(localStorage.getItem("deeplinkDataLi"));
+
+        if (dataLi2.length > 0) {
+          return [dataLi2, dataLi2[0]];
+        } else {
+          return [[], DEF_DATA];
+        }
+      }
+
+      $(function () {
+        const [dataLi, currData] = deppData();
+        dataObj = currData;
+
+        drawSaving(dataLi);
+
+        init();
+        rendUrl();
+
+        $("textarea").on("input", function (e) {
+          rendUrl();
+        });
+      });
+
+      function rendUrl() {
+        const qstr = makeQueryString();
+        const fullUrl = URL + qstr;
+
+        $("#fullUrl").text(fullUrl);
+      }
+
+      function makeQueryString() {
+        const fullStr = $("textarea").val();
+        try {
+          dataObj = JSON.parse(fullStr);
+          $("#status").text("GOGO");
+        } catch (error) {
+          console.log("🚀 ~ error:", error);
+          $("#status").text("JSON PARSE ERROR");
+        }
+
+        const screenId = dataObj.screenId;
+        const query = encodeURIComponent(JSON.stringify(dataObj.query || {}));
+
+        const elseQuiObj =
+          Object.fromEntries(
+            Object.entries(dataObj).filter(
+              ([k, v]) => k !== "screenId" && k !== "query"
+            )
+          ) || {};
+
+        const queryStr =
+          "?screenId=" +
+          screenId +
+          "&query=" +
+          query +
+          Object.keys(elseQuiObj)
+            .map((k) => `&${k}=${elseQuiObj[k]}`)
+            .join("");
+        console.log("🚀 ~ queryStr:", queryStr);
+        return queryStr;
+      }
+
+      function init() {
+        const pretyJson = JSON.stringify(dataObj, null, 2);
+        console.log("🚀 ~ draw ~ pretyJson:", pretyJson);
+        $("textarea").val(pretyJson);
+      }
+
+      $("#fullUrl").on("click", function () {
+        copyy();
+      });
+      function copyy() {
+        const strr = $("#fullUrl").text();
+
+        console.log("🚀 ~ $ ~ content:", strr);
+
+        var textarea = document.createElement("textarea");
+        textarea.value = strr;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+
+      function saveCurr() {
+        const dataObj = $("textarea").val();
+        // localStorage.setItem("deeplinkData", dataObj);
+        const [dataLi, _] = deppData();
+
+        dataLi.unshift(JSON.parse(dataObj));
+
+        localStorage.setItem(
+          "deeplinkDataLi",
+          JSON.stringify(dataLi.slice(0, 5))
+        );
+      }
+
+      function drawSaving(dataLi) {
+        dataLi.forEach((data, idx) => {
+          $("#buttons").append(
+            `<button class='savedBtn' onClick="savedBtn(${idx})">load ${idx}</button>`
+          );
+        });
+      }
+
+      function savedBtn(num) {
+        const [dataLi, _] = deppData();
+        const curr = dataLi[num];
+        console.log("🚀 ~ curr:", curr);
+
+        dataObj = curr;
+
+        init();
+        rendUrl();
+      }
+    </script>
+  </body>
+</html>

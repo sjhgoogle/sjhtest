@@ -5,7 +5,7 @@ const cors = require("cors");
 const app = express();
 const path = require("path");
 const cookieparser = require("cookie-parser");
-const { v4: uuid } = require("uuid");
+const { v7: uuid } = require("uuid");
 const mime = require("mime-types");
 // const contentType = require("content-type");
 const axios = require("axios");
@@ -243,11 +243,32 @@ app.get("/myheader", (req, res) => {
   const headers = req.headers;
 
   // Create an HTML string with the header values
-  let htmlResponse = "<html><body><h1>Request Header Values</h1><ul>";
+  let htmlResponse = "<html><body><h1>! Request Header Values</h1><ul>";
   for (const [key, value] of Object.entries(headers)) {
     htmlResponse += `<li><strong>${key}:</strong> ${value}</li>`;
   }
   htmlResponse += "</ul></body></html>";
+  htmlResponse += `
+    <script>
+      fetch("https://ipapi.co/json/")
+        .then(rr=>rr.json())
+        .then(res=>{
+          const city = res.city;
+          const country_name = res.country_name;
+           
+          const li1 = document.createElement("li");
+          li1.textContent = "나라 >> " + country_name;
+
+          const li2 = document.createElement("li");
+          li2.textContent = "지역 >> " + city;
+
+          const ul = document.getElementsByTagName('ul')[0];
+          ul.appendChild(li1);
+          ul.appendChild(li2);
+        })
+    </script>
+  
+  `;
 
   // Send the HTML response
   res.send(htmlResponse);
@@ -460,6 +481,7 @@ class ChatMessage {
   constructor() {
     // load from file chatLi.txt if exists
     const filePath = path.join(__dirname, "chatLi.txt");
+    console.log("🚀 ~ ChatMessage ~ constructor ~ filePath:", filePath);
     if (!fs.existsSync(filePath)) {
       fs.writeFileSync(filePath, JSON.stringify([]));
     }

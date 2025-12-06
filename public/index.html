@@ -63,9 +63,9 @@
         </div>
       </div>
     </template>
-    <h1 class="px-5 mb-5">sjhtest</h1>
+    <h1 class="px-1 mb-5">sjhtest</h1>
     <div id="contents" class="d-flex flex-column justify-content-center">
-      <div class="px-5 w-100 mb-6">
+      <div class="px-1 w-100 mb-6">
         <div
           id="chat-div"
           class="bg-warning"
@@ -74,15 +74,20 @@
           <template id="chat-div-li">
             <!-- <li class="border border-dark lisn mb-3 list-unstyled"><pre>hello gogo</pre></li> -->
             <li
-              class="btn btn-info w-100 mb-3 border border-dark position-relative"
+              class="btn btn-info w-100 mb-3 border border-dark position-relative p-0"
             >
-              <pre>hello gogo</pre>
-              <button
-                style="height: 100%"
-                class="position-absolute top-0 end-0"
-              >
-                remov
-              </button>
+              <div class="d-flex">
+                <pre
+                  style="white-space: pre-wrap; word-wrap: break-word; flex: 1"
+                  class=""
+                ></pre>
+                <button
+                  style="width: 80px; margin-left: 3px"
+                  class="btn btn-success"
+                >
+                  remov
+                </button>
+              </div>
             </li>
           </template>
         </div>
@@ -144,7 +149,7 @@
           <template id="chat-file-li">
             <li>
               <a style="color: black" download="" href="">wefwef</a>
-              <span>X</span>
+              <span class="p-1 bg-danger">X</span>
             </li>
           </template>
           <ul id="chat-file-div">
@@ -273,6 +278,12 @@
         </div>
 
         <div class="d-grid gap-1">
+          <a
+            href="/deeplink.html"
+            target="_blank"
+            class="btn btn-info text-start"
+            >deeplink!!</a
+          >
           <a
             href="/jwtToken.html"
             target="_blank"
@@ -521,7 +532,7 @@
             console.log(chatMsg);
             const li = $($("#chat-div-li").clone().html());
             li.find("pre").text(chatMsg);
-            li.find("button").text("cnt : " + ($("#chat-div li").length + 1));
+            li.find("button").text("cnt:" + ($("#chat-div li").length + 1));
 
             $("#chat-div").append(li);
             $("#chat-div").scrollTop($("#chat-div").prop("scrollHeight"));
@@ -613,7 +624,9 @@
                 // check if fileNm endwith .jpg or .png
                 if (fileNm.endsWith(".jpg") || fileNm.endsWith(".png")) {
                   li.append(
-                    " <img src='/fileChatDown/" + fileNm + "' width='100' />"
+                    " <img class='d-block' src='/fileChatDown/" +
+                      fileNm +
+                      "' width='100' />"
                   );
                 }
                 ul.append(li);

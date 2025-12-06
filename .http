@@ -1,4 +1,31 @@
 ###
+GET https://api.cloudflare.com/client/v4/user/tokens/verify HTTP/1.1
+Authorization: Bearer WtPFzQZMfIXVuocDG0TQRmHkrHyai7CeS_eMoJJY
+
+###
+GET https://api.cloudflare.com/client/v4/accounts/bee72c598cc7b019f29e9caa69d30db2/images/v1 HTTP/1.1
+Authorization: Bearer WtPFzQZMfIXVuocDG0TQRmHkrHyai7CeS_eMoJJY
+
+
+###
+POST https://api.cloudflare.com/client/v4/accounts/bee72c598cc7b019f29e9caa69d30db2/calls/turn_keys HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer WtPFzQZMfIXVuocDG0TQRmHkrHyai7CeS_eMoJJY
+
+{
+  "name": "my-turn-key"
+}
+
+###
+
+// curl https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/calls/turn_keys \
+//     -H 'Content-Type: application/json' \
+//     -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+//     -d '{
+//           "name": "my-turn-key"1
+//         }'
+
+###
 GET http://192.168.0.78:9004/v1/users?groupID=0&subInclude=true&offset=0&limit=10
 Cookie: ucsinfo=0d5f2ec5-e41b-428f-5c08-eadf71bf68a7; extinfo=9d51b4e236ec593131500a12691fa26a
 
