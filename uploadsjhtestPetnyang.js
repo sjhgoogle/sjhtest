@@ -16,11 +16,11 @@ let onlyFile = true; // 파일 옮기기만하고 remoteCommand 안할때 true
 const localDir = __dirname;
 const remoteDir = "/home/ubuntu/sjhtest";
 const remoteCommand = "cd /home/ubuntu/sjhtest && pm2 restart sjhtest";
-const remoteHost = "sjhtest.petnyang.shop"; // 134.185.109.113
+const remoteHost = "sjhtest.petnyang.shop"; //
 const remoteUser = "ubuntu";
 // const remotePass = "eoqkr!@34";
 // const remotePort = 9022;
-const skipList = [".git", "node_modules", "chatLi.txt"]; // 제외할 폴더명/파일명 리스트
+const skipList = [".git", "node_modules", "chatLi.txt", "fileChat"]; // 제외할 폴더명/파일명 리스트
 
 // Initialize SFTP client
 const sftp = new ClientSFTP();
@@ -52,7 +52,7 @@ async function uploadDirWithProgress(localDir, remoteDir) {
   });
   console.log(
     "🚀 ~ uploadDirWithProgress ~ filteredFiles:",
-    filteredFiles.length
+    filteredFiles.length,
   );
 
   const totalSize = filteredFiles.reduce((acc, f) => acc + f.size, 0);
@@ -63,7 +63,7 @@ async function uploadDirWithProgress(localDir, remoteDir) {
     const relativePath = path.relative(localDir, file.path);
     const remoteFilePath = path.posix.join(
       remoteDir,
-      relativePath.split(path.sep).join("/")
+      relativePath.split(path.sep).join("/"),
     );
 
     try {
@@ -91,7 +91,7 @@ sftp
     username: remoteUser,
     // password: remotePass,
     privateKey: fs.readFileSync(
-      path.join("C:\\Users\\user\\.ssh\\aws-ubuntu.pem")
+      path.join("C:\\Users\\user\\.ssh\\aws-ubuntu.pem"),
     ),
   })
   .then(async () => {
@@ -117,7 +117,7 @@ sftp
           stream
             .on("close", (code, signal) => {
               console.log(
-                `Command executed on remote server with code ${code}`
+                `Command executed on remote server with code ${code}`,
               );
               sftp.end();
               conn.end();
@@ -135,7 +135,7 @@ sftp
         // port: remotePort,
         username: remoteUser,
         privateKey: fs.readFileSync(
-          path.join("C:\\Users\\user\\.ssh\\aws-ubuntu.pem")
+          path.join("C:\\Users\\user\\.ssh\\aws-ubuntu.pem"),
         ),
         // password: remotePass,
       });
