@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>CodeMirror + JS Run</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/dracula.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/hint/show-hint.css"
+    />
+
+    <style>
+      body {
+        margin: 0;
+        font-family: sans-serif;
+      }
+      .CodeMirror {
+        height: 60vh;
+      }
+      #controls {
+        padding: 10px;
+        background: #222;
+        color: #fff;
+      }
+      #output {
+        height: 30vh;
+        background: #111;
+        color: #0f0;
+        padding: 10px;
+        overflow: auto;
+        white-space: pre;
+      }
+      button {
+        padding: 6px 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="controls">
+      <button onclick="runCode()">▶ Run</button>
+    </div>
+
+    <textarea id="editor"></textarea>
+    <div id="output"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/javascript/javascript.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/hint/show-hint.js"></script>
+
+    <script>
+      const editor = CodeMirror.fromTextArea(
+        document.getElementById("editor"),
+        {
+          mode: "javascript",
+          theme: "dracula",
+          lineNumbers: true,
+
+          extraKeys: {
+            "Ctrl-Enter": function () {
+              runCode(); // 🔥 실행
+            },
+          },
+        },
+      );
+
+      editor.setValue(`console.log("hello");
+
+const abcd = 123;
+console.log(abcd);
+`);
+
+      function runCode() {
+        const code = editor.getValue();
+        const output = document.getElementById("output");
+        output.textContent = "";
+
+        // console.log 가로채기
+        const originalLog = console.log;
+        console.log = (...args) => {
+          output.textContent += args.join(" ") + "\n";
+          //   output.textContent += args.join(" ") + "\\n";
+          originalLog(...args);
+        };
+
+        try {
+          new Function(code)(); // 🔥 실행
+        } catch (e) {
+          output.textContent += "ERROR: " + e.message;
+        }
+
+        console.log = originalLog;
+      }
+    </script>
+  </body>
+</html>

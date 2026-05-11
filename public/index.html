@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <!-- Google tag (gtag.js) -->
@@ -247,7 +247,15 @@
             <!-- <a href="/ping/same/1" target="_blank" class="btn btn-info text-start">n초후 같은 json 그대로리턴</a> -->
             <a
               href="javascript:void(0)"
-              onclick='fetch("/ping/same/1", { method: "POST", headers: { "content-type": "application/json", },body: JSON.stringify({ a: 1, b: 2, }), }).then(r=>r.json()).then(d => alert(JSON.stringify(d)))'
+              onclick="
+                fetch('/ping/same/1', {
+                  method: 'POST',
+                  headers: { 'content-type': 'application/json' },
+                  body: JSON.stringify({ a: 1, b: 2 }),
+                })
+                  .then((r) => r.json())
+                  .then((d) => alert(JSON.stringify(d)))
+              "
               class="btn btn-info text-start"
               >n초후 같은 json 그대로리턴</a
             >
@@ -266,7 +274,15 @@
 
             <a
               href="javascript:void(0)"
-              onclick='fetch("/ping/sameErr/1", { method: "POST", headers: { "content-type": "application/json",}, body: JSON.stringify({ a: 1, b: "sjh-err", }), }).then(r=>r.json()).then(d => alert(JSON.stringify(d)))'
+              onclick="
+                fetch('/ping/sameErr/1', {
+                  method: 'POST',
+                  headers: { 'content-type': 'application/json' },
+                  body: JSON.stringify({ a: 1, b: 'sjh-err' }),
+                })
+                  .then((r) => r.json())
+                  .then((d) => alert(JSON.stringify(d)))
+              "
               class="btn btn-info text-start"
               >n초후 같은 json 그대로리턴</a
             >
@@ -350,6 +366,17 @@
             >kcpCert 본인인증 테스트</a
           >
 
+          <a
+            href="/imgData.html"
+            target="_blank"
+            class="btn btn-info text-start"
+            >이미지데이터</a
+          >
+
+          <a href="/editor.html" target="_blank" class="btn btn-info text-start"
+            >editor!!</a
+          >
+
           <div class="card card-body">
             <h1>cors 스킵해서 쏘기</h1>
             <button
@@ -360,7 +387,20 @@
             </button>
             <button
               class="btn btn-primary"
-              onclick='fetch("/skipCors", {method: "POST", headers: {"Content-Type": "application/json",},body: JSON.stringify({endPoint: "https://www.naver.com",method: "GET",headerData: {},bodyData: "",}), }).then(r=>r.text()).then(d => alert(d.slice(0,100)))'
+              onclick="
+                fetch('/skipCors', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    endPoint: 'https://www.naver.com',
+                    method: 'GET',
+                    headerData: {},
+                    bodyData: '',
+                  }),
+                })
+                  .then((r) => r.text())
+                  .then((d) => alert(d.slice(0, 100)))
+              "
             >
               네이버 skipCors로 프록시 우회
             </button>
@@ -412,7 +452,9 @@
             name=""
             id="paging-textarea"
             cols="30"
-            onkeyup="(window.event.ctrlKey) && (window.event.keyCode == 13) && paging()"
+            onkeyup="
+              window.event.ctrlKey && window.event.keyCode == 13 && paging()
+            "
           >
             {
                 "pageNo" : 1,
@@ -459,7 +501,7 @@
               prev[curr[0]] = curr[1];
               return prev;
             },
-            {}
+            {},
           );
           console.log("🚀 ~ paramObj ~ paramObj:", paramObj);
 
@@ -626,7 +668,7 @@
                   li.append(
                     " <img class='d-block' src='/fileChatDown/" +
                       fileNm +
-                      "' width='100' />"
+                      "' width='100' />",
                   );
                 }
                 ul.append(li);
@@ -741,7 +783,7 @@
                   req.responseText +
                   "\n" +
                   "error:" +
-                  err
+                  err,
               );
             },
           });
