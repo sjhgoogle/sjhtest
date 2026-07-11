@@ -85,7 +85,7 @@ const uploadFileChat = multer({
       console.log(222222222222222222222);
 
       file.originalname = Buffer.from(file.originalname, "latin1").toString(
-        "utf8"
+        "utf8",
       );
       cb(null, `${uuid()}-${file.originalname}`);
     },
@@ -139,6 +139,17 @@ app.get("/fileChatDown/:fileUuid", (req, res) => {
   const filename = req.params.fileUuid;
   const fPath = path.join(__dirname, "fileChat", filename);
   res.download(fPath, filename, (err) => {
+    if (err) {
+      console.log("🚀 ~ app.get ~ err", err);
+      res.status(500).send("ERR");
+    }
+  });
+});
+app.get("/fileChatShow/:fileUuid", (req, res) => {
+  const filename = req.params.fileUuid;
+  const fPath = path.join(__dirname, "fileChat", filename);
+
+  res.sendFile(fPath, (err) => {
     if (err) {
       console.log("🚀 ~ app.get ~ err", err);
       res.status(500).send("ERR");
@@ -413,14 +424,14 @@ const httpsServer = require("https").createServer(
   {
     key: fs.readFileSync(
       // "C:\\Users\\siha1\\Desktop\\project\\private\\playground\\js-playground\\.vscode\\lo.cal.com\\lo.cal.com.key"
-      path.join(__dirname, "socketio", "lo.cal.com.key")
+      path.join(__dirname, "socketio", "lo.cal.com.key"),
     ),
     cert: fs.readFileSync(
       // "C:\\Users\\siha1\\Desktop\\project\\private\\playground\\js-playground\\.vscode\\lo.cal.com\\lo.cal.com.crt"
-      path.join(__dirname, "socketio", "lo.cal.com.crt")
+      path.join(__dirname, "socketio", "lo.cal.com.crt"),
     ),
   },
-  tmpEx
+  tmpEx,
 );
 // const httpsServer = require("http").createServer(tmpEx)
 
@@ -428,7 +439,7 @@ const WEBRTC_SOCKETIO_PORT = 19001;
 httpsServer.listen(WEBRTC_SOCKETIO_PORT, () => {
   console.log(
     "소켓 io 전용 https 서버...",
-    `https://localhost:${WEBRTC_SOCKETIO_PORT}`
+    `https://localhost:${WEBRTC_SOCKETIO_PORT}`,
   );
 });
 const io = socketioServer(httpsServer);

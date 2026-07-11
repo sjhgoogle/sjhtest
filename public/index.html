@@ -666,10 +666,16 @@
                 // check if fileNm endwith .jpg or .png
                 if (fileNm.endsWith(".jpg") || fileNm.endsWith(".png")) {
                   li.append(
-                    " <img class='d-block' src='/fileChatDown/" +
+                    " <img class='d-block' src='/fileChatShow/" +
                       fileNm +
                       "' width='100' />",
                   );
+                  li.on("click", "img", function (e) {
+                    e.stopPropagation();
+                    const img = e.currentTarget;
+                    const src = $(img).attr("src");
+                    window.open(src, "_blank");
+                  });
                 }
                 ul.append(li);
               });
